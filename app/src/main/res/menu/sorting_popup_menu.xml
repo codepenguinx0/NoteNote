@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/sorting_popup_menu_create_date"
+        android:title="Latest to Oldest (Default)" />
+    <item
+        android:id="@+id/sorting_popup_menu_title_a_z"
+        android:title="Title (A to Z)" />
+    <item
+        android:id="@+id/sorting_popup_menu_title_z_a"
+        android:title="Title (Z to A)" />
+    <item
+        android:id="@+id/sorting_popup_menu_category"
+        android:title="Category" />
+    <item
+        android:id="@+id/sorting_popup_menu_mood"
+        android:title="Mood" />
+
+
+</menu>

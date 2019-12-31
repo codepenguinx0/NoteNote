@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="note_entry_adapter_title_size">24sp</dimen>
+    <dimen name="adapter_margin_start_end">16dp</dimen>
+    <dimen name="adapter_margin_top_bottom">8dp</dimen>
+    <dimen name="card_view_corner_radius">8dp</dimen>
+</resources>
