@@ -19,8 +19,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.teampenguin.apps.notenote.Adapters.NoteEntryListAdapter;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.R;
+import com.teampenguin.apps.notenote.Utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
 
@@ -97,17 +101,15 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         {
             case R.id.sorting_popup_menu_create_date:
                 Log.d(TAG, "onMenuItemClick: create date");
-//                adapter.sort(0);
+                sortByCreateDateLToO();
                 return true;
             case R.id.sorting_popup_menu_title_a_z:
                 Log.d(TAG, "onMenuItemClick: title a to z");
-                adapter.sort(1);
-                adapter.notifyDataSetChanged();
+                sortByTitleAToZ();
                 return true;
             case R.id.sorting_popup_menu_title_z_a:
                 Log.d(TAG, "onMenuItemClick: title z to a");
-                adapter.sort(2);
-                adapter.notifyDataSetChanged();
+                sortByTitleZToA();
                 return true;
             case R.id.sorting_popup_menu_category:
                 Log.d(TAG, "onMenuItemClick: category");
@@ -119,4 +121,65 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
                 return false;
         }
     }
+
+    private void sortByCreateDateLToO()
+    {
+        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
+        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
+                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
+                return d1.compareTo(d2);
+            }
+        });
+
+        adapter.setNewSortedNoteEntries(sortedNoteEntries);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void sortByCreateDateOToL()
+    {
+        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
+        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
+                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
+                return d2.compareTo(d1);
+            }
+        });
+
+        adapter.setNewSortedNoteEntries(sortedNoteEntries);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void sortByTitleAToZ()
+    {
+        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
+        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                return o1.getNoteTitle().compareTo(o2.getNoteTitle());
+            }
+        });
+
+        adapter.setNewSortedNoteEntries(sortedNoteEntries);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void sortByTitleZToA()
+    {
+        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
+        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                return o2.getNoteTitle().compareTo(o1.getNoteTitle());
+            }
+        });
+
+        adapter.setNewSortedNoteEntries(sortedNoteEntries);
+        adapter.notifyDataSetChanged();
+    }
+
 }

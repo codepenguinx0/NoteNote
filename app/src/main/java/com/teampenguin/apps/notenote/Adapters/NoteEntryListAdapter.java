@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.R;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,6 +29,11 @@ public class NoteEntryListAdapter extends RecyclerView.Adapter<NoteEntryListAdap
     public NoteEntryListAdapter(@NonNull List<NoteEntryM> noteEntries)
     {
         this.noteEntries = noteEntries;
+    }
+
+    public void setNewSortedNoteEntries(ArrayList<NoteEntryM> sortedNoteEntries)
+    {
+        this.noteEntries = sortedNoteEntries;
     }
 
     @NonNull
@@ -51,58 +57,6 @@ public class NoteEntryListAdapter extends RecyclerView.Adapter<NoteEntryListAdap
 
     }
 
-    public void sort(int sortMode)
-    {
-        switch (sortMode)
-        {
-            case SORT_MODE_CREATE_DATE:
-                sortByCreateDate();
-                break;
-            case SORT_MODE_TITLE_AZ:
-                sortByTitleAZ();
-                break;
-            case SORT_MODE_TITLE_ZA:
-                sortByTitleZA();
-                break;
-            case SORT_MODE_CATEGORY:
-                break;
-            case SORT_MODE_MOOD:
-                break;
-            default:
-                sortByCreateDate();
-                break;
-        }
-    }
-
-    private void sortByCreateDate()
-    {
-        Collections.sort(noteEntries, new Comparator<NoteEntryM>() {
-            @Override
-            public int compare(NoteEntryM o1, NoteEntryM o2) {
-                return 0;
-            }
-        });
-    }
-
-    private void sortByTitleAZ()
-    {
-        Collections.sort(noteEntries, new Comparator<NoteEntryM>() {
-            @Override
-            public int compare(NoteEntryM o1, NoteEntryM o2) {
-                return o1.getNoteTitle().compareTo(o2.getNoteTitle());
-            }
-        });
-    }
-
-    private void sortByTitleZA()
-    {
-        Collections.sort(noteEntries, new Comparator<NoteEntryM>() {
-            @Override
-            public int compare(NoteEntryM o1, NoteEntryM o2) {
-                return o2.getNoteTitle().compareTo(o1.getNoteTitle());
-            }
-        });
-    }
 
     @Override
     public int getItemCount() {

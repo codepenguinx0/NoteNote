@@ -3,6 +3,7 @@ package com.teampenguin.apps.notenote.Utils;
 import android.app.Activity;
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.inputmethod.InputMethodManager;
 
@@ -11,12 +12,32 @@ import java.util.Date;
 
 public class Utils {
 
+    private static final String TAG = "Utils";
     public static String convertDateToString(Date date){
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy hh:mm a");
         String dateString = sdf.format(date);
 
         return dateString;
+    }
+
+    public static Date convertDateStringToDate(String dateString)
+    {
+        Date date = new Date();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy hh:mm a");
+        try{
+
+            date = sdf.parse(dateString);
+
+        }catch (Exception e)
+        {
+            Log.e(TAG, "convertDateStringToDate: ", e);
+
+        }finally{
+
+            return date;
+        }
     }
 
     public static void hideSoftKeyboard(Activity activity) {
