@@ -20,11 +20,12 @@ import java.util.List;
 public class NoteEntryListAdapter extends RecyclerView.Adapter<NoteEntryListAdapter.NoteEntryAdapterListViewHolder> {
 
     private List<NoteEntryM> noteEntries;
-    public static final int SORT_MODE_CREATE_DATE = 0;
-    public static final int SORT_MODE_TITLE_AZ = 1;
-    public static final int SORT_MODE_TITLE_ZA = 2;
-    public static final int SORT_MODE_CATEGORY = 3;
-    public static final int SORT_MODE_MOOD = 4;
+
+//    public static final int SORT_MODE_CREATE_DATE = 0;
+//    public static final int SORT_MODE_TITLE_AZ = 1;
+//    public static final int SORT_MODE_TITLE_ZA = 2;
+//    public static final int SORT_MODE_CATEGORY = 3;
+//    public static final int SORT_MODE_MOOD = 4;
 
     public NoteEntryListAdapter(@NonNull List<NoteEntryM> noteEntries)
     {
@@ -54,7 +55,6 @@ public class NoteEntryListAdapter extends RecyclerView.Adapter<NoteEntryListAdap
             holder.createDateTV.setText(noteEntry.getCreateDate());
             holder.categoryTV.setText(String.valueOf(noteEntry.getCategory()));
         }
-
     }
 
 
