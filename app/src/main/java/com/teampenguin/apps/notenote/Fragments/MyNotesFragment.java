@@ -26,13 +26,21 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
 
-    private static final String TAG = "MyNotesFragment";
-    private RecyclerView myNotesRV;
-    private ImageView sortIV;
-    private ArrayList<NoteEntryM> noteEntries;
-    private NoteEntryListAdapter adapter;
+    public static final String TAG = "MyNotesFragment";
+
+    @BindView(R.id.my_notes_rv)
+    RecyclerView myNotesRV;
+    @BindView(R.id.my_notes_sort_iv)
+    ImageView sortIV;
+
+    ArrayList<NoteEntryM> noteEntries;
+    NoteEntryListAdapter adapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,16 +66,8 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_my_notes, container, false);
-        myNotesRV = view.findViewById(R.id.my_notes_rv);
+        ButterKnife.bind(this,view);
         myNotesRV.setLayoutManager(new LinearLayoutManager(getActivity()));
-        sortIV = view.findViewById(R.id.my_notes_sort_iv);
-        sortIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                showSortingPopupMenu(v);
-            }
-        });
 
         return view;
     }
@@ -84,9 +84,10 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         myNotesRV.setAdapter(adapter);
     }
 
-    private void showSortingPopupMenu(View view)
+    @OnClick(R.id.my_notes_sort_iv)
+    public void showSortingPopupMenu()
     {
-        PopupMenu popupMenu = new PopupMenu(getActivity(),view);
+        PopupMenu popupMenu = new PopupMenu(getActivity(),sortIV);
         popupMenu.setOnMenuItemClickListener(this);
         popupMenu.inflate(R.menu.sorting_popup_menu);
         popupMenu.show();

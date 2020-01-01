@@ -2,6 +2,7 @@ package com.teampenguin.apps.notenote.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.PagerAdapter;
@@ -22,6 +23,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.teampenguin.apps.notenote.Adapters.MainViewPagerAdapter;
+import com.teampenguin.apps.notenote.Fragments.AddNotesToDoPopupFragment;
+import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
 import com.teampenguin.apps.notenote.Fragments.MyNotesFragment;
 import com.teampenguin.apps.notenote.Fragments.TodoListFragment;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
@@ -31,34 +34,47 @@ import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class MainActivity extends BaseActivity{
 
-//    private NoteEntryViewModel noteEntryViewModel;
+public class MainActivity extends BaseActivity implements CommonFragmentInterface {
+
+    //    private NoteEntryViewModel noteEntryViewModel;
     private static final String TAG = "MainActivity";
-    private ViewPager viewPager;
-    private EditText searchBarET;
-    private ImageView menuIV;
-    private ImageView settingsIV;
-    private LinearLayout goToMyNotesLL;
-    private LinearLayout goToTodoListLL;
-    private ImageView addIV;
-    private Toolbar toolBar;
+
+    @BindView(R.id.main_view_pager)
+    ViewPager viewPager;
+    @BindView(R.id.tool_bar_search_bar_et)
+    EditText searchBarET;
+    @BindView(R.id.tool_bar_menu_iv)
+    ImageView menuIV;
+    @BindView(R.id.tool_bar_settings_iv)
+    ImageView settingsIV;
+    @BindView(R.id.bottom_bar_my_notes_ll)
+    LinearLayout goToMyNotesLL;
+    @BindView(R.id.bottom_bar_todo_list_ll)
+    LinearLayout goToTodoListLL;
+    @BindView(R.id.main_add_iv)
+    ImageView addIV;
+    @BindView(R.id.main_tool_bar)
+    Toolbar toolBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        toolBar = findViewById(R.id.main_tool_bar);
+//        toolBar = findViewById(R.id.main_tool_bar);
         setSupportActionBar(toolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         getViews();
         setViewPagerAdapter();
-        setButtons();
 
 //        noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
 //        noteEntryViewModel.getAllNoteEntries().observe(this, new Observer<List<NoteEntryM>>() {
@@ -69,16 +85,7 @@ public class MainActivity extends BaseActivity{
 //        });
     }
 
-    private void getViews()
-    {
-        viewPager = findViewById(R.id.main_view_pager);
-        searchBarET = findViewById(R.id.tool_bar_search_bar_et);
-        menuIV = findViewById(R.id.tool_bar_menu_iv);
-        settingsIV = findViewById(R.id.tool_bar_settings_iv);
-        goToMyNotesLL = findViewById(R.id.bottom_bar_my_notes_ll);
-        goToTodoListLL = findViewById(R.id.bottom_bar_todo_list_ll);
-        addIV = findViewById(R.id.main_add_iv);
-
+    private void getViews() {
         //for removing focus from the search bar edit text when the keyboard is hidden
         final View activityRootView = findViewById(R.id.main_activity_root_rl);
         activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -87,18 +94,14 @@ public class MainActivity extends BaseActivity{
                 int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
                 Log.d(TAG, "onGlobalLayout: heightDiff" + heightDiff);
                 //the normal difference between the activityRootView and the real RootView is around 200 (189)
-                if(heightDiff > 100 && heightDiff < 300)
-                {
+                if (heightDiff > 100 && heightDiff < 300) {
                     searchBarET.clearFocus();
                 }
             }
         });
-        //end
-
     }
 
-    private void setViewPagerAdapter()
-    {
+    private void setViewPagerAdapter() {
         MainViewPagerAdapter adapter = new MainViewPagerAdapter(getSupportFragmentManager());
 
         TodoListFragment todoListFragment = new TodoListFragment();
@@ -116,11 +119,9 @@ public class MainActivity extends BaseActivity{
 
             @Override
             public void onPageSelected(int position) {
-                if(position==0)
-                {
+                if (position == 0) {
                     onTodoListPageSelected();
-                }else if(position==1)
-                {
+                } else if (position == 1) {
                     onMyNotesPageSelected();
                 }
             }
@@ -131,63 +132,60 @@ public class MainActivity extends BaseActivity{
             }
         });
 
-        //todo list selected by default
+        //task list selected by default
         onTodoListPageSelected();
     }
 
-    private void setButtons()
-    {
-        goToTodoListLL.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewPager.setCurrentItem(0);
-                onTodoListPageSelected();
-            }
-        });
-
-        goToMyNotesLL.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewPager.setCurrentItem(1);
-                onMyNotesPageSelected();
-            }
-        });
-        
-        addIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO
-                Toast.makeText(MainActivity.this, "Add!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        menuIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO
-                Toast.makeText(MainActivity.this, "Open Drawer!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        settingsIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO
-                Toast.makeText(MainActivity.this, "Open Settings!", Toast.LENGTH_SHORT).show();
-            }
-        });
+    @OnClick(R.id.bottom_bar_todo_list_ll)
+    public void goToTaskList() {
+        viewPager.setCurrentItem(0);
+        onTodoListPageSelected();
     }
 
-    private void onTodoListPageSelected()
-    {
+    @OnClick(R.id.bottom_bar_my_notes_ll)
+    public void goToNoteList() {
+        viewPager.setCurrentItem(1);
+        onMyNotesPageSelected();
+    }
+
+    @OnClick(R.id.main_add_iv)
+    public void showAddPopup() {
+        searchBarET.setEnabled(false);
+        AddNotesToDoPopupFragment fragment = new AddNotesToDoPopupFragment();
+        fragment.setCommonListener(this);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.main_container_popup, fragment, AddNotesToDoPopupFragment.TAG)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(AddNotesToDoPopupFragment.TAG)
+                .commit();
+    }
+
+    @OnClick(R.id.tool_bar_menu_iv)
+    public void openDrawer() {
+        Toast.makeText(this, "Open Drawer!", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.tool_bar_settings_iv)
+    public void openSettings() {
+        Toast.makeText(this, "Open Settings!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void onTodoListPageSelected() {
         goToTodoListLL.setBackgroundColor(getResources().getColor(R.color.main_dark_yellow));
         goToMyNotesLL.setBackgroundColor(getResources().getColor(R.color.main_yellow));
     }
 
-    private void onMyNotesPageSelected()
-    {
+    private void onMyNotesPageSelected() {
         goToMyNotesLL.setBackgroundColor(getResources().getColor(R.color.main_dark_yellow));
         goToTodoListLL.setBackgroundColor(getResources().getColor(R.color.main_yellow));
+    }
+
+    @Override
+    public void closeFragment(String tag) {
+
+        searchBarET.setEnabled(true);
+        closeFragmentByTag(tag);
+
     }
 
 //    private void updateList(List<NoteEntryM> noteEntries)
