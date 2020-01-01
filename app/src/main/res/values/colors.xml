@@ -9,4 +9,6 @@
     <color name="main_dark_yellow">#ebe052</color>
     <color name="main_orange">#FFC122</color>
     <color name="main_light_yellow">#fffbab</color>
+    <color name="edit_note_very_light_yellow">#fffdd0</color>
+    <color name="hint_text_light_grey">#e6e6e6</color>
 </resources>

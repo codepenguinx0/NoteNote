@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,10 +41,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class MainActivity extends BaseActivity implements CommonFragmentInterface {
+public class MainActivity extends BaseActivity implements CommonFragmentInterface, AddNotesToDoPopupFragment.AddPopupFragmentCallBack {
 
     //    private NoteEntryViewModel noteEntryViewModel;
-    private static final String TAG = "MainActivity";
+    public static final String TAG = "MainActivity";
+    private static final int PAGE_TASKS = 0;
+    private static final int PAGE_NOTES = 1;
 
     @BindView(R.id.main_view_pager)
     ViewPager viewPager;
@@ -119,9 +123,9 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
 
             @Override
             public void onPageSelected(int position) {
-                if (position == 0) {
+                if (position == PAGE_TASKS) {
                     onTodoListPageSelected();
-                } else if (position == 1) {
+                } else if (position == PAGE_NOTES) {
                     onMyNotesPageSelected();
                 }
             }
@@ -138,13 +142,13 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
 
     @OnClick(R.id.bottom_bar_todo_list_ll)
     public void goToTaskList() {
-        viewPager.setCurrentItem(0);
+        viewPager.setCurrentItem(PAGE_TASKS);
         onTodoListPageSelected();
     }
 
     @OnClick(R.id.bottom_bar_my_notes_ll)
     public void goToNoteList() {
-        viewPager.setCurrentItem(1);
+        viewPager.setCurrentItem(PAGE_NOTES);
         onMyNotesPageSelected();
     }
 
@@ -153,6 +157,7 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
         searchBarET.setEnabled(false);
         AddNotesToDoPopupFragment fragment = new AddNotesToDoPopupFragment();
         fragment.setCommonListener(this);
+        fragment.setCallBackListener(this);
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.main_container_popup, fragment, AddNotesToDoPopupFragment.TAG)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -185,6 +190,21 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
 
         searchBarET.setEnabled(true);
         closeFragmentByTag(tag);
+
+    }
+
+    @Override
+    public void createNewNote() {
+
+        closeFragmentByTag(AddNotesToDoPopupFragment.TAG);
+        Intent intent = new Intent(this, EditNoteActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    @Override
+    public void createNewTask() {
 
     }
 

@@ -27,6 +27,7 @@ public class AddNotesToDoPopupFragment extends Fragment {
     RelativeLayout popupContentRL;
 
     private CommonFragmentInterface commonListener = null;
+    private AddPopupFragmentCallBack callBackListener = null;
 
     @Nullable
     @Override
@@ -38,6 +39,11 @@ public class AddNotesToDoPopupFragment extends Fragment {
 
     public void setCommonListener(CommonFragmentInterface listener) {
         this.commonListener = listener;
+    }
+
+    public void setCallBackListener(AddPopupFragmentCallBack listener)
+    {
+        this.callBackListener = listener;
     }
 
     @OnClick({R.id.add_popup_close_iv, R.id.add_popup_frame_rl})
@@ -55,5 +61,14 @@ public class AddNotesToDoPopupFragment extends Fragment {
     @OnClick(R.id.add_popup_new_note_ll)
     public void openNewNoteActivity() {
         Toast.makeText(getActivity(), "Add New Note", Toast.LENGTH_SHORT).show();
+        if(callBackListener!=null)
+        {
+            callBackListener.createNewNote();
+        }
+    }
+
+    public interface AddPopupFragmentCallBack {
+        void createNewNote();
+        void createNewTask();
     }
 }

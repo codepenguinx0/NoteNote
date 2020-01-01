@@ -6,6 +6,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,7 +24,7 @@ public class Utils {
 
     public static Date convertDateStringToDate(String dateString)
     {
-        Date date = new Date();
+        Date date;
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy hh:mm a");
         try{
@@ -33,11 +34,10 @@ public class Utils {
         }catch (Exception e)
         {
             Log.e(TAG, "convertDateStringToDate: ", e);
-
-        }finally{
-
-            return date;
+            date = new Date();
         }
+
+        return date;
     }
 
     public static void hideSoftKeyboard(Activity activity) {
@@ -52,6 +52,16 @@ public class Utils {
             inputMethodManager.hideSoftInputFromWindow(
                     activity.getCurrentFocus().getWindowToken(), 0);
         }
+    }
+
+    public static boolean isEditTextEmpty(EditText et)
+    {
+        if(et.getText().toString().trim().length() > 0)
+        {
+            return false;
+        }
+
+        return true;
     }
 
 }

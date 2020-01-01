@@ -14,6 +14,12 @@ public class NoteEntryM {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
+    @ColumnInfo(name = "author_name")
+    private String authorName;
+
+    @ColumnInfo(name = "author_id")
+    private int authorId;
+
     @ColumnInfo(name = "note_title")
     private String noteTitle;
 
@@ -32,16 +38,21 @@ public class NoteEntryM {
     @ColumnInfo(name = "note_mood")
     private int mood;
 
+    @ColumnInfo(name = "is_active")
+    private boolean isActive;
+
 
     public NoteEntryM()
     {
-        id = -1;
+        authorName = "";
+        authorId = 0;
         noteTitle = "No Title";
         createDate = Utils.convertDateToString(new Date());
         modifiedDate = "";
         content = "";
-        category = -1;
-        mood = -1;
+        category = 0;
+        mood = 0;
+        isActive = true;
     }
 
     public int getId() {
@@ -50,6 +61,22 @@ public class NoteEntryM {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
     }
 
     public String getNoteTitle() {
@@ -98,5 +125,13 @@ public class NoteEntryM {
 
     public void setCategory(int category) {
         this.category = category;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }
