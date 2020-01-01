@@ -17,6 +17,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class NoteEntryListAdapter extends RecyclerView.Adapter<NoteEntryListAdapter.NoteEntryAdapterListViewHolder> {
 
     private List<NoteEntryM> noteEntries;
@@ -71,16 +74,17 @@ public class NoteEntryListAdapter extends RecyclerView.Adapter<NoteEntryListAdap
     public static class NoteEntryAdapterListViewHolder extends RecyclerView.ViewHolder {
 
 
+        @BindView(R.id.note_entry_title_tv)
         public TextView titleTV;
+        @BindView(R.id.note_entry_create_date_tv)
         public TextView createDateTV;
+        @BindView(R.id.note_entry_category_tv)
         public TextView categoryTV;
 
         public NoteEntryAdapterListViewHolder(@NonNull View itemView) {
 
             super(itemView);
-            titleTV = itemView.findViewById(R.id.note_entry_title_tv);
-            createDateTV = itemView.findViewById(R.id.note_entry_create_date_tv);
-            categoryTV = itemView.findViewById(R.id.note_entry_category_tv);
+            ButterKnife.bind(this, itemView);
 
         }
     }
