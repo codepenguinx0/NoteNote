@@ -12,11 +12,13 @@ import com.teampenguin.apps.notenote.Utils.Utils;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
+    private static final String TAG = "BaseActivity";
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         if(getCurrentFocus()!=null)
         {
+            Log.d(TAG, "dispatchTouchEvent: hide soft keyboard");
             Utils.hideSoftKeyboard(this);
         }
 
