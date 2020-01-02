@@ -59,4 +59,6 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
 
     implementation 'com.github.irshulx:laser-native-editor:3.0.4'
+
+    implementation 'jp.wasabeef:richeditor-android:1.2.2'
 }

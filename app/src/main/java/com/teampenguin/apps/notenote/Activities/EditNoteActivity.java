@@ -108,6 +108,15 @@ public class EditNoteActivity extends BaseActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_CODE_READ_EXTERNAL_STORAGE);
+        } else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+        }else
+        {
+            Log.d(TAG, "checkPermissions: all permissions granted!");
         }
     }
 
@@ -120,14 +129,25 @@ public class EditNoteActivity extends BaseActivity {
             {
                 if(grantResults[0]==PackageManager.PERMISSION_GRANTED)
                 {
-                    Log.d(TAG, "onRequestPermissionsResult: ok!!");
+                    Log.d(TAG, "onRequestPermissionsResult: read ok!!");
+                    checkPermissions();
                 }
                 else
                 {
                     Toast.makeText(this, "You must grant permission to read external storage", Toast.LENGTH_SHORT).show();
                     finish();
                 }
-
+            }else if(requestCode == REQUEST_CODE_WRITE_EXTERNAL_STORAGE)
+            {
+                if(grantResults[0]==PackageManager.PERMISSION_GRANTED)
+                {
+                    Log.d(TAG, "onRequestPermissionsResult: write ok!!");
+                }
+                else
+                {
+                    Toast.makeText(this, "You must grant permission to write external storage", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
