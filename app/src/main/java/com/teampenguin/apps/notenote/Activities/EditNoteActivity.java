@@ -62,10 +62,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
         ButterKnife.bind(this);
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
 
         checkPermissions();
         initializeEditor();
@@ -88,16 +84,10 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         if (requestCode == REQUEST_CODE_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
 
-//            Uri uri = data.getData();
-//
-//            Log.d(TAG, "onActivityResult: uri.getPath()" + uri.getPath());
-//            Log.d(TAG, "onActivityResult: currentPhotoPath" + currentPhotoPath);
             insertPhotoToEditor();
 
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            //Write your code if there's no result
             Toast.makeText(getApplicationContext(), "Cancelled", Toast.LENGTH_SHORT).show();
-            // editor.RestoreState();
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -164,35 +154,31 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     @OnClick(R.id.editor_bold_iv)
     public void changeTextStyleBold() {
-//        editor.updateTextStyle(EditorTextStyle.BOLD);
         editor.setBold();
     }
 
     @OnClick(R.id.editor_italic_iv)
     public void changeTextStyleItalic() {
-//        editor.updateTextStyle(EditorTextStyle.ITALIC);
         editor.setItalic();
     }
 
     @OnClick(R.id.editor_link_iv)
     public void insertLink() {
-//        editor.insertLink();
+
 
     }
 
     @OnClick(R.id.editor_image_iv)
     public void insertImage() {
-//        editor.openImagePicker();
+
         showImagePopup();
 
     }
 
     @OnClick(R.id.edit_note_back_iv)
     public void getEditorContent() {
-//        String s = editor.getContentAsSerialized();
-//        String s2 = editor.getContentAsHTML(s);
-//        Log.d(TAG, "getEditorContent: " + s);
-//        Log.d(TAG, "getEditorContent: " + s2);
+
+
     }
 
     private void showImagePopup() {
@@ -231,16 +217,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         return image;
     }
 
-    private void insertPhotoToEditor()
-    {
-        //TODO
+    private void insertPhotoToEditor() {
         savePhotoToExternalStorage();
         resizeCurrentPhoto();
-        editor.insertImage(currentPhotoPath,"image");
+        editor.insertImage(currentPhotoPath, "image");
     }
 
-    private void savePhotoToExternalStorage()
-    {
+    private void savePhotoToExternalStorage() {
 //        Log.d(TAG, "savePhotoToGallery: ?");
 //        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
 //        File f = new File(currentPhotoPath);
@@ -250,14 +233,12 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         //TODO
     }
 
-    private void resizeCurrentPhoto()
-    {
+    private void resizeCurrentPhoto() {
         Bitmap bmp = BitmapFactory.decodeFile(currentPhotoPath);
-        
-        if(bmp!=null)
-        {
+
+        if (bmp != null) {
             Log.d(TAG, "resizeCurrentPhoto: yo1");
-            Bitmap resizedBmp = Utils.getResizedBitmap(bmp,(int)(bmp.getWidth()*0.1),(int)(bmp.getHeight()*0.1));
+            Bitmap resizedBmp = Utils.getResizedBitmap(bmp, (int) (bmp.getWidth() * 0.1), (int) (bmp.getHeight() * 0.1));
             try (FileOutputStream out = new FileOutputStream(currentPhotoPath)) {
                 Log.d(TAG, "resizeCurrentPhoto: yo2");
                 resizedBmp.compress(Bitmap.CompressFormat.PNG, 100, out);
@@ -271,8 +252,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     @Override
     public void takePhoto() {
+
         closeFragmentWithTag(PickImagePopupFragment.TAG);
-//        Toast.makeText(this, "take photo!", Toast.LENGTH_SHORT).show();
 
         File photoFile = null;
         try {
@@ -294,7 +275,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
             startActivityForResult(takePictureIntent, REQUEST_CODE_IMAGE_CAPTURE);
         }
-
 
     }
 
