@@ -5,10 +5,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +28,7 @@ import java.io.IOException;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import jp.wasabeef.richeditor.RichEditor;
 
 public class EditNoteActivity extends BaseActivity {
 
@@ -33,58 +37,78 @@ public class EditNoteActivity extends BaseActivity {
     public static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 101;
     public static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 102;
 
+//    @BindView(R.id.edit_note_editor)
+//    Editor editor;
     @BindView(R.id.edit_note_editor)
-    Editor editor;
+    RichEditor editor;
+    @BindView(R.id.edit_note_title_et)
+    EditText noteTitleET;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
         ButterKnife.bind(this);
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
         checkPermissions();
+        initializeEditor();
+    }
+
+    private void initializeEditor()
+    {
+        editor.setEditorHeight(200);
+        editor.setEditorFontSize(20);
+        editor.setEditorFontColor(Color.BLACK);
+        editor.setPadding(10, 10, 10, 10);
+        editor.setBackground(getDrawable(R.drawable.half_transparent_white_rounded_bg));
+        editor.setPlaceholder("Insert text here...");
+        editor.setInputEnabled(true);
     }
 
     @OnClick(R.id.editor_bold_iv)
     public void changeTextStyleBold() {
-        editor.updateTextStyle(EditorTextStyle.BOLD);
+//        editor.updateTextStyle(EditorTextStyle.BOLD);
+        editor.setBold();
     }
 
     @OnClick(R.id.editor_italic_iv)
     public void changeTextStyleItalic() {
-        editor.updateTextStyle(EditorTextStyle.ITALIC);
+//        editor.updateTextStyle(EditorTextStyle.ITALIC);
+        editor.setItalic();
     }
 
     @OnClick(R.id.editor_link_iv)
     public void insertLink() {
-        editor.insertLink();
+//        editor.insertLink();
+
     }
 
     @OnClick(R.id.editor_image_iv)
     public void insertImage() {
-        editor.openImagePicker();
+//        editor.openImagePicker();
+
     }
 
     @OnClick(R.id.edit_note_back_iv)
     public void getEditorContent() {
-        String s = editor.getContentAsSerialized();
-        String s2 = editor.getContentAsHTML(s);
-        Log.d(TAG, "getEditorContent: " + s);
-        Log.d(TAG, "getEditorContent: " + s2);
+//        String s = editor.getContentAsSerialized();
+//        String s2 = editor.getContentAsHTML(s);
+//        Log.d(TAG, "getEditorContent: " + s);
+//        Log.d(TAG, "getEditorContent: " + s2);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == editor.PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == 101 && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-
                 if(bitmap!=null)
                 {
                     Log.d(TAG, "bitmap " + String.valueOf(bitmap));
-                    editor.insertImage(bitmap);
+//                    editor.insertImage(bitmap);
                 }
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();

@@ -32,6 +32,7 @@
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:textColorHint="@color/hint_text_light_grey"
+            android:focusedByDefault="true"
             android:textSize="24sp" />
 
         <LinearLayout
@@ -92,15 +93,10 @@
                 android:layout_height="wrap_content">
 
 
-                <com.github.irshulx.Editor
+                <jp.wasabeef.richeditor.RichEditor
                     android:id="@+id/edit_note_editor"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:paddingTop="10dp"
-                    android:paddingRight="10dp"
-                    app:placeholder="Start writing here..."
-                    app:render_type="Editor" />
+                    android:layout_height="match_parent" />
 
             </LinearLayout>
         </ScrollView>
