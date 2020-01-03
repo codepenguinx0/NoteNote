@@ -2,8 +2,6 @@ package com.teampenguin.apps.notenote.Activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,10 +11,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -34,15 +31,12 @@ import com.teampenguin.apps.notenote.Fragments.PickImagePopupFragment;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,9 +50,10 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     public static final int PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE = 101;
     public static final int PERMISSION_REQUEST_CODE_CAMERA = 102;
     public static final int REQUEST_CODE_IMAGE_CAPTURE = 201;
-
+    public static final int REQUEST_CODE_PICK_IMAGE = 202;
     private static final String appDirectoryName = "NoteNote";
-    private static File imageRoot;
+
+    private File imageRoot;
 
     @BindView(R.id.edit_note_editor)
     RichEditor editor;
@@ -92,9 +87,24 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == REQUEST_CODE_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
 
-            insertPhotoToEditor();
+            if(requestCode==REQUEST_CODE_IMAGE_CAPTURE)
+            {
+                insertPhotoToEditor();
+            }else if(requestCode == REQUEST_CODE_PICK_IMAGE)
+            {
+                if(data == null)
+                {
+                    Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+                    return;
+                }else
+                {
+                    Uri uri = data.getData();
+
+                    Log.d(TAG, "onActivityResult: pick photo from " + uri.getPath());
+                }
+            }
 
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Toast.makeText(getApplicationContext(), "Cancelled", Toast.LENGTH_SHORT).show();
@@ -174,7 +184,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     {
         imageRoot = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), appDirectoryName);
-        
+
         if(!imageRoot.exists())
         {
             if(imageRoot.mkdirs())
@@ -185,7 +195,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         {
             Log.d(TAG, "createPhotoFolder: imageRoot already existed");
         }
-        
     }
 
     @OnClick(R.id.editor_bold_iv)
@@ -212,10 +221,12 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     @OnClick(R.id.edit_note_back_iv)
     public void getEditorContent() {
 
-
+        String htmlString = editor.getHtml();
+        Log.d(TAG, "getEditorContent: " + htmlString);
     }
 
     private void showImagePopup() {
+        Utils.hideSoftKeyboard(this);
         PickImagePopupFragment fragment = new PickImagePopupFragment(this, this);
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.edit_note_frame, fragment, PickImagePopupFragment.TAG)
@@ -256,6 +267,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         savePhotoToExternalStorage();
         resizeCurrentPhoto();
         editor.insertImage(currentPhotoPath, "image");
+        addEncodeImageToEditor();
     }
 
     private void savePhotoToExternalStorage(){
@@ -277,6 +289,30 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
                 e.printStackTrace();
             }
         }
+    }
+
+    private void addEncodeImageToEditor()
+    {
+//        String encodedImageString = "<p hidden>" + Base64.encodeToString(getByteArray(), Base64.DEFAULT) + "</p>";
+//        String encodedImageString = Base64.encodeToString(getByteArray(), Base64.DEFAULT);
+//        String htmlString  = editor.getHtml() + encodedImageString;
+//
+//        editor.setHtml(htmlString);
+        //TODO
+        //do not include image in the editor
+        //add involved image on the side
+        //create an attachPhoto object
+    }
+
+    private byte[] getByteArray()
+    {
+        byte[] b;
+        Bitmap bm = BitmapFactory.decodeFile(currentPhotoPath);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
+        b = baos.toByteArray();
+
+        return b;
     }
 
     // <----------------interface methods---------------->
@@ -311,8 +347,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     @Override
     public void openGallery() {
+
         closeFragmentWithTag(PickImagePopupFragment.TAG);
         Toast.makeText(this, "open gallery!", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Pick a photo"), REQUEST_CODE_PICK_IMAGE);
     }
 
     @Override
@@ -347,6 +388,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
                 if(fos!=null)
                 {
                     try {
+                        Log.d(TAG, "doInBackground: close outputstream");
                         fos.close();
                     } catch (IOException e) {
                         e.printStackTrace();

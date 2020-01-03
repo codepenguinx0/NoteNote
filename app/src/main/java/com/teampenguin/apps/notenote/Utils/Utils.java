@@ -83,6 +83,12 @@ public class Utils {
         return resizedBitmap;
     }
 
+    public static String getTimeStringForFileName(Date date)
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HHmmss");
+        return sdf.format(date);
+    }
+
 }
 
 
