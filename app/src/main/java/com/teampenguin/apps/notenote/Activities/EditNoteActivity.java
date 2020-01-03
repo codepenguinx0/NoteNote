@@ -2,12 +2,15 @@ package com.teampenguin.apps.notenote.Activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -32,10 +35,14 @@ import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +56,9 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     public static final int PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE = 101;
     public static final int PERMISSION_REQUEST_CODE_CAMERA = 102;
     public static final int REQUEST_CODE_IMAGE_CAPTURE = 201;
+
+    private static final String appDirectoryName = "NoteNote";
+    private static File imageRoot;
 
     @BindView(R.id.edit_note_editor)
     RichEditor editor;
@@ -125,7 +135,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setEditorFontSize(20);
         editor.setEditorFontColor(Color.BLACK);
         editor.setPadding(10, 10, 10, 10);
-        editor.setBackground(getDrawable(R.drawable.half_transparent_white_rounded_bg));
         editor.setPlaceholder("Insert text here...");
         editor.setInputEnabled(true);
         editor.focusEditor();
@@ -147,9 +156,36 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     PERMISSION_REQUEST_CODE_CAMERA);
+        } else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_CODE_CAMERA);
         } else {
+
             Log.d(TAG, "checkPermissions: all permissions granted!");
+            createPhotoFolder();
         }
+    }
+
+    private void createPhotoFolder()
+    {
+        imageRoot = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), appDirectoryName);
+        
+        if(!imageRoot.exists())
+        {
+            if(imageRoot.mkdirs())
+            {
+                Log.d("mkdir","success");
+            }
+        }else
+        {
+            Log.d(TAG, "createPhotoFolder: imageRoot already existed");
+        }
+        
     }
 
     @OnClick(R.id.editor_bold_iv)
@@ -170,9 +206,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     @OnClick(R.id.editor_image_iv)
     public void insertImage() {
-
         showImagePopup();
-
     }
 
     @OnClick(R.id.edit_note_back_iv)
@@ -202,6 +236,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     private File createPhotoFile() throws IOException {
+
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -223,14 +258,10 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.insertImage(currentPhotoPath, "image");
     }
 
-    private void savePhotoToExternalStorage() {
-//        Log.d(TAG, "savePhotoToGallery: ?");
-//        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-//        File f = new File(currentPhotoPath);
-//        Uri contentUri = Uri.fromFile(f);
-//        mediaScanIntent.setData(contentUri);
-//        this.sendBroadcast(mediaScanIntent);
-        //TODO
+    private void savePhotoToExternalStorage(){
+
+        SavePhotoToExternalStorageAsyncTask task = new SavePhotoToExternalStorageAsyncTask();
+        task.execute(imageRoot.getAbsolutePath(),currentPhotoPath);
     }
 
     private void resizeCurrentPhoto() {
@@ -241,7 +272,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             Bitmap resizedBmp = Utils.getResizedBitmap(bmp, (int) (bmp.getWidth() * 0.1), (int) (bmp.getHeight() * 0.1));
             try (FileOutputStream out = new FileOutputStream(currentPhotoPath)) {
                 Log.d(TAG, "resizeCurrentPhoto: yo2");
-                resizedBmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+                resizedBmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -287,5 +318,43 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     @Override
     public void closeFragment(String tag) {
         closeFragmentWithTag(tag);
+    }
+
+    // <----------------inner classes---------------->
+
+    private static class SavePhotoToExternalStorageAsyncTask extends AsyncTask<String,Void,Void>
+    {
+        @Override
+        protected Void doInBackground(String... strings) {
+
+            FileOutputStream fos = null;
+            Date currentTime = new Date();
+            String fileName = "image_" + Utils.getTimeStringForFileName(currentTime) + ".jpg";
+            File outputImage = new File(strings[0] + File.separator + fileName);
+
+            try{
+                outputImage.createNewFile();
+                Bitmap bmp = BitmapFactory.decodeFile(strings[1]);
+                fos = new FileOutputStream(outputImage);
+                bmp.compress(Bitmap.CompressFormat.JPEG,100,fos);
+                Log.d(TAG, "SavePhotoToExternalStorageAsyncTask doInBackground: saved!");
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+
+            } finally {
+
+                if(fos!=null)
+                {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }
