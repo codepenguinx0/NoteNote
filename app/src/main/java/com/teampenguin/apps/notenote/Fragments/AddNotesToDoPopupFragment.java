@@ -55,12 +55,16 @@ public class AddNotesToDoPopupFragment extends Fragment {
 
     @OnClick(R.id.add_popup_new_task_ll)
     public void openNewTaskActivity() {
-        Toast.makeText(getActivity(), "Add New Task", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), "Add New Task", Toast.LENGTH_SHORT).show();
+        if(callBackListener!=null)
+        {
+            callBackListener.createNewTask();
+        }
     }
 
     @OnClick(R.id.add_popup_new_note_ll)
     public void openNewNoteActivity() {
-        Toast.makeText(getActivity(), "Add New Note", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), "Add New Note", Toast.LENGTH_SHORT).show();
         if(callBackListener!=null)
         {
             callBackListener.createNewNote();

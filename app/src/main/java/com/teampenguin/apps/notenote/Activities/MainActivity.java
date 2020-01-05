@@ -98,7 +98,7 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
                 int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
                 Log.d(TAG, "onGlobalLayout: heightDiff" + heightDiff);
                 //the normal difference between the activityRootView and the real RootView is around 200 (189)
-                if (heightDiff > 100 && heightDiff < 300) {
+                if (heightDiff > 10 && heightDiff < 300) {
                     searchBarET.clearFocus();
                 }
             }
@@ -197,6 +197,7 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
     public void createNewNote() {
 
         closeFragmentByTag(AddNotesToDoPopupFragment.TAG);
+        searchBarET.setEnabled(true);
         Intent intent = new Intent(this, EditNoteActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -206,6 +207,9 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
     @Override
     public void createNewTask() {
 
+        closeFragmentByTag(AddNotesToDoPopupFragment.TAG);
+        searchBarET.setEnabled(true);
+        Toast.makeText(this, "Create new task!", Toast.LENGTH_SHORT).show();
     }
 
 //    private void updateList(List<NoteEntryM> noteEntries)

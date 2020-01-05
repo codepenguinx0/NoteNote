@@ -3,6 +3,8 @@ package com.teampenguin.apps.notenote.Activities;
 import android.content.Intent;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -18,7 +20,32 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         if(getCurrentFocus()!=null)
         {
-            Log.d(TAG, "dispatchTouchEvent: hide soft keyboard");
+//            boolean hideKeyboard = true;
+//            Log.d(TAG, "dispatchTouchEvent: class of view" + getCurrentFocus().getClass().getName());
+//
+//            if(getCurrentFocus() instanceof LinearLayout)
+//            {
+//                Log.d(TAG, "dispatchTouchEvent: the touched view is a Linear Layout");
+//                LinearLayout ll = (LinearLayout) getCurrentFocus();
+//                int childCount = ll.getChildCount();
+//                Log.d(TAG, "dispatchTouchEvent: childCount " + childCount);
+//
+//                for (int i = 0; i < childCount; i++) {
+//                    View v = ll.getChildAt(i);
+//                    if(v instanceof TextEditorImageView)
+//                    {
+//                        Log.d(TAG, "dispatchTouchEvent: contains TextEditorImageView");
+//                        hideKeyboard = false;
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            if(hideKeyboard)
+//            {
+//                Log.d(TAG, "dispatchTouchEvent: hide keyboard");
+//                Utils.hideSoftKeyboard(this);
+//            }
             Utils.hideSoftKeyboard(this);
         }
 
@@ -31,6 +58,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         if(fragment!=null)
         {
+            Log.d(TAG, "closeFragmentByTag: remove fragment");
             getSupportFragmentManager().beginTransaction()
                     .remove(fragment);
             getSupportFragmentManager().popBackStack();

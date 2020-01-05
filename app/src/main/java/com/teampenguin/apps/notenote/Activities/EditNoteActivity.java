@@ -11,10 +11,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,7 +32,9 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.teampenguin.apps.notenote.Fragments.ChooseTextColourPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
+import com.teampenguin.apps.notenote.Fragments.InsertLinkPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.PickImagePopupFragment;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
@@ -43,7 +51,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import jp.wasabeef.richeditor.RichEditor;
 
-public class EditNoteActivity extends AppCompatActivity implements PickImagePopupFragment.PickImagePopupCallBack, CommonFragmentInterface {
+public class EditNoteActivity extends AppCompatActivity implements PickImagePopupFragment.PickImagePopupCallBack, CommonFragmentInterface,
+        InsertLinkPopupFragment.InsertLinkPopupCallBack, ChooseTextColourPopupFragment.ChooseTextColourPopupCallBack {
 
     public static final String TAG = "EditNoteActivity";
 
@@ -52,6 +61,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     public static final int REQUEST_CODE_IMAGE_CAPTURE = 201;
     public static final int REQUEST_CODE_PICK_IMAGE = 202;
     private static final String appDirectoryName = "NoteNote";
+    public static final int POPUP_DELAY_MS = 300;
 
     private File imageRoot;
 
@@ -59,8 +69,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     RichEditor editor;
     @BindView(R.id.edit_note_title_et)
     EditText noteTitleET;
+    @BindView(R.id.edit_note_editor_options_hsv)
+    HorizontalScrollView editorOptionsHSV;
+    @BindView(R.id.edit_note_editor_options_ll)
+    LinearLayout editorOptionsLL;
 
     private String currentPhotoPath;
+    private int hsvWidth;
+    private int llWidth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,7 +86,49 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         checkPermissions();
         initializeEditor();
+        checkLayout();
+
+        final View activityRootView = findViewById(R.id.edit_note_activity_root);
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
+                Log.d(TAG, "onGlobalLayout: heightDiff" + heightDiff);
+                //the normal difference between the activityRootView and the real RootView is around 200 (189)
+                if (heightDiff > 10 && heightDiff < 300) {
+                    clearAllFocus();
+                }
+            }
+        });
+
+        editorOptionsHSV.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                editorOptionsHSV.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                hsvWidth = editorOptionsHSV.getWidth();
+                Log.d(TAG, "onGlobalLayout: HSV width " + hsvWidth);
+                if(llWidth!=0)
+                {
+                    checkLayout();
+                }
+            }
+        });
+
+        editorOptionsLL.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                editorOptionsLL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                llWidth = editorOptionsLL.getWidth();
+                Log.d(TAG, "onGlobalLayout: LL width " + llWidth);
+                if(hsvWidth!=0)
+                {
+                    checkLayout();
+                }
+            }
+        });
     }
+
+
 
     @Override
     public void startActivity(Intent intent) {
@@ -139,15 +197,22 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     //<----------------functions---------------->
+    //region FUNCTIONS
 
     private void initializeEditor() {
-        editor.setEditorHeight(200);
+//        editor.setEditorHeight(200);
         editor.setEditorFontSize(20);
         editor.setEditorFontColor(Color.BLACK);
-        editor.setPadding(10, 10, 10, 10);
+        editor.setPadding(20, 20, 20, 20);
         editor.setPlaceholder("Insert text here...");
         editor.setInputEnabled(true);
-        editor.focusEditor();
+        editor.setBackgroundColor(getResources().getColor(R.color.transparent));
+    }
+
+    private void clearAllFocus()
+    {
+        editor.clearFocus();
+        noteTitleET.clearFocus();
     }
 
     private void checkPermissions() {
@@ -180,6 +245,23 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         }
     }
 
+    private void checkLayout()
+    {
+        if(hsvWidth > llWidth)
+        {
+            Log.d(TAG, "checkLayout: editorOptionsHSV.getWidth() > editorOptionsLL.getWidth()");
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)editorOptionsLL.getLayoutParams();
+            layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+            editorOptionsLL.setLayoutParams(layoutParams);
+        }else if(hsvWidth <= llWidth)
+        {
+            Log.d(TAG, "checkLayout: editorOptionsHSV.getWidth() <= editorOptionsLL.getWidth()");
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)editorOptionsLL.getLayoutParams();
+            layoutParams.gravity = Gravity.NO_GRAVITY;
+            editorOptionsLL.setLayoutParams(layoutParams);
+        }
+    }
+
     private void createPhotoFolder()
     {
         imageRoot = new File(Environment.getExternalStoragePublicDirectory(
@@ -197,6 +279,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         }
     }
 
+    //region EDITOR BUTTONS
+
     @OnClick(R.id.editor_bold_iv)
     public void changeTextStyleBold() {
         editor.setBold();
@@ -207,16 +291,62 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setItalic();
     }
 
+    @OnClick(R.id.editor_underline_iv)
+    public void changeTextStyleUnderline()
+    {
+        editor.setUnderline();
+    }
+
+    @OnClick(R.id.editor_strikethrough_iv)
+    public void changeTextStyleStrikeThrough()
+    {
+        editor.setStrikeThrough();
+
+    }
+
+    @OnClick(R.id.editor_undo_iv)
+    public void changeTextUndo()
+    {
+        editor.undo();
+    }
+
+    @OnClick(R.id.editor_redo_iv)
+    public void changeTextRedo()
+    {
+        editor.redo();
+    }
+
     @OnClick(R.id.editor_link_iv)
     public void insertLink() {
 
+        showInsertLinkPopup();
+    }
 
+    @OnClick(R.id.editor_bulleted_list_iv)
+    public void changeTextBulletList()
+    {
+        editor.setBullets();
+    }
+
+    @OnClick(R.id.editor_numbered_list_iv)
+    public void changeTextNumberList()
+    {
+        editor.setNumbers();
     }
 
     @OnClick(R.id.editor_image_iv)
     public void insertImage() {
         showImagePopup();
     }
+
+    @OnClick(R.id.editor_text_colour_iv)
+    public void changeTextColour()
+    {
+        showChangeColourPopup();
+    }
+
+    //endregion
+
 
     @OnClick(R.id.edit_note_back_iv)
     public void getEditorContent() {
@@ -226,16 +356,71 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     private void showImagePopup() {
+
         Utils.hideSoftKeyboard(this);
-        PickImagePopupFragment fragment = new PickImagePopupFragment(this, this);
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.edit_note_frame, fragment, PickImagePopupFragment.TAG)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .addToBackStack(PickImagePopupFragment.TAG)
-                .commit();
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                PickImagePopupFragment fragment = new PickImagePopupFragment(EditNoteActivity.this, EditNoteActivity.this);
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.edit_note_frame, fragment, PickImagePopupFragment.TAG)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .addToBackStack(PickImagePopupFragment.TAG)
+                        .commit();
+            }
+        };
+
+        //delay the popup for 300ms for the keyboard to hide first
+        Handler handler = new Handler();
+        handler.postDelayed(r, POPUP_DELAY_MS);
+
     }
 
-    private void closeFragmentWithTag(String tag) {
+    private void showInsertLinkPopup()
+    {
+        Utils.hideSoftKeyboard(this);
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                InsertLinkPopupFragment fragment = new InsertLinkPopupFragment(EditNoteActivity.this, EditNoteActivity.this);
+                getSupportFragmentManager().beginTransaction()
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .add(R.id.edit_note_frame, fragment, InsertLinkPopupFragment.TAG)
+                        .addToBackStack(InsertLinkPopupFragment.TAG)
+                        .commit();
+            }
+        };
+
+        //delay the popup for 300ms for the keyboard to hide first
+        Handler handler = new Handler();
+        handler.postDelayed(r, POPUP_DELAY_MS);
+    }
+
+    private void showChangeColourPopup()
+    {
+//        Utils.hideSoftKeyboard(this);
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                ChooseTextColourPopupFragment fragment = new ChooseTextColourPopupFragment(EditNoteActivity.this, EditNoteActivity.this);
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.edit_note_frame, fragment, ChooseTextColourPopupFragment.TAG)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .addToBackStack(ChooseTextColourPopupFragment.TAG)
+                        .commit();
+            }
+        };
+
+        //delay the popup for 300ms for the keyboard to hide first
+        Handler handler = new Handler();
+        handler.postDelayed(r, POPUP_DELAY_MS);
+    }
+
+    private void closeFragmentByTag(String tag) {
+
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
 
         if (fragment != null) {
@@ -314,13 +499,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         return b;
     }
+    //endregion
 
     // <----------------interface methods---------------->
-
+    //region INTERFACE METHODS
     @Override
     public void takePhoto() {
 
-        closeFragmentWithTag(PickImagePopupFragment.TAG);
+        closeFragmentByTag(PickImagePopupFragment.TAG);
 
         File photoFile = null;
         try {
@@ -348,7 +534,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     @Override
     public void openGallery() {
 
-        closeFragmentWithTag(PickImagePopupFragment.TAG);
+        closeFragmentByTag(PickImagePopupFragment.TAG);
         Toast.makeText(this, "open gallery!", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -358,10 +544,28 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     @Override
     public void closeFragment(String tag) {
-        closeFragmentWithTag(tag);
+//        Utils.hideSoftKeyboard(this);
+        closeFragmentByTag(tag);
     }
 
-    // <----------------inner classes---------------->
+    @Override
+    public void insertLink(String url, String displayName) {
+
+        closeFragment(InsertLinkPopupFragment.TAG);
+        editor.insertLink(url, displayName);
+    }
+
+    @Override
+    public void changeTextColour(String colour) {
+        Log.d(TAG, "changeTextColour: choose colour " + colour);
+        editor.setTextColor(Color.parseColor(colour));
+        closeFragment(ChooseTextColourPopupFragment.TAG);
+        editor.requestFocus();
+    }
+
+    //endregion
+
+    //region INNER CLASSES
 
     private static class SavePhotoToExternalStorageAsyncTask extends AsyncTask<String,Void,Void>
     {
@@ -399,4 +603,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             return null;
         }
     }
+
+    //endregion
 }

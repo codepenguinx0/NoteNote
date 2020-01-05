@@ -7,11 +7,14 @@ import android.graphics.Matrix;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import jp.wasabeef.richeditor.RichEditor;
 
 public class Utils {
 
@@ -54,6 +57,18 @@ public class Utils {
             inputMethodManager.hideSoftInputFromWindow(
                     activity.getCurrentFocus().getWindowToken(), 0);
         }
+    }
+
+    public static void showSoftKeyboard(Activity activity, View view)
+    {
+        if(view instanceof EditText || view instanceof RichEditor)
+        {
+            Log.d(TAG, "showSoftKeyboard: show!");
+            view.requestFocus();
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        }
+
     }
 
     public static boolean isEditTextEmpty(EditText et)

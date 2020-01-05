@@ -7,4 +7,19 @@
         <item>Random</item>
         <item>Others</item>
     </string-array>
+
+    <string-array name="editorTextColours">
+        <item>#000000</item>
+        <item>#e62222</item>
+        <item>#ffc124</item>
+        <item>#ffe524</item>
+        <item>#4fe310</item>
+        <item>#34a106</item>
+        <item>#5cdafa</item>
+        <item>#276cdb</item>
+        <item>#8c009c</item>
+        <item>#ff87d7</item>
+        <item>#ffffff</item>
+        <item>#a8a8a8</item>
+    </string-array>
 </resources>
