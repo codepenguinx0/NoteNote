@@ -2,6 +2,7 @@ package com.teampenguin.apps.notenote.Activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,19 +26,23 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.teampenguin.apps.notenote.Fragments.ChooseTextColourPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
 import com.teampenguin.apps.notenote.Fragments.InsertLinkPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.PickImagePopupFragment;
+import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
+import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -45,6 +50,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,11 +84,16 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     private int hsvWidth;
     private int llWidth;
 
+    private NoteEntryViewModel noteEntryViewModel;
+    private NoteEntryM currentNote = null;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
         ButterKnife.bind(this);
+
+        noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
 
         checkPermissions();
         initializeEditor();
@@ -334,10 +345,11 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setNumbers();
     }
 
-    @OnClick(R.id.editor_image_iv)
-    public void insertImage() {
-        showImagePopup();
-    }
+    //TODO add image
+//    @OnClick(R.id.editor_image_iv)
+//    public void insertImage() {
+//        showImagePopup();
+//    }
 
     @OnClick(R.id.editor_text_colour_iv)
     public void changeTextColour()
@@ -345,15 +357,34 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         showChangeColourPopup();
     }
 
-    //endregion
+    @OnClick(R.id.edit_note_save_iv)
+    public void saveNote()
+    {
+        if(currentNote == null)
+        {
+            createNewNote();
+        }else
+        {
+            updateNote();
+        }
 
+    }
 
     @OnClick(R.id.edit_note_back_iv)
-    public void getEditorContent() {
+    public void back()
+    {
+        String content = getEditorContent();
 
-        String htmlString = editor.getHtml();
-        Log.d(TAG, "getEditorContent: " + htmlString);
+        if(content!=null && !content.isEmpty())
+        {
+            showNotSaveAlert();
+        }else
+        {
+            onBackPressed();
+        }
     }
+
+    //endregion
 
     private void showImagePopup() {
 
@@ -498,6 +529,69 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         b = baos.toByteArray();
 
         return b;
+    }
+
+    private String getEditorContent() {
+
+        return editor.getHtml();
+    }
+
+    private void createNewNote()
+    {
+        NoteEntryM newNoteEntry = new NoteEntryM();
+
+        newNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET)?"No Title":noteTitleET.getText().toString());
+        newNoteEntry.setContent(getEditorContent());
+        newNoteEntry.setCreateDate(Utils.convertDateToString(new Date()));
+        newNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
+        noteEntryViewModel.insert(newNoteEntry);
+
+        currentNote = newNoteEntry;
+
+        Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateNote()
+    {
+        NoteEntryM updatedNoteEntry = new NoteEntryM();
+
+        updatedNoteEntry.setId(currentNote.getId());
+        updatedNoteEntry.setAuthorId(currentNote.getAuthorId());
+        updatedNoteEntry.setAuthorName(currentNote.getAuthorName());
+        updatedNoteEntry.setCreateDate(currentNote.getCreateDate());
+        updatedNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
+        updatedNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET)?"No Title":noteTitleET.getText().toString());
+        updatedNoteEntry.setContent(getEditorContent());
+//        updateNoteEntry.setCategory();
+//        updateNoteEntry.setMood();
+        noteEntryViewModel.update(updatedNoteEntry);
+        currentNote = updatedNoteEntry;
+
+        Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showNotSaveAlert()
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("Note not saved")
+                .setMessage("Do you wish to quit without saving?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onBackPressed();
+                    }
+                })
+                .setNeutralButton("Save and Quit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        saveNote();
+                        onBackPressed();
+                    }
+                })
+                .setNegativeButton("Cancel",null)
+                .create();
+
+        alertDialog.show();
     }
     //endregion
 

@@ -71,6 +71,11 @@ public class NoteEntryListAdapter extends RecyclerView.Adapter<NoteEntryListAdap
         return noteEntries.get(pos);
     }
 
+    public void updateNoteEntries(ArrayList<NoteEntryM> noteEntries)
+    {
+        this.noteEntries = noteEntries;
+    }
+
     public static class NoteEntryAdapterListViewHolder extends RecyclerView.ViewHolder {
 
 

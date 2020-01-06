@@ -43,7 +43,6 @@ import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity implements CommonFragmentInterface, AddNotesToDoPopupFragment.AddPopupFragmentCallBack {
 
-    //    private NoteEntryViewModel noteEntryViewModel;
     public static final String TAG = "MainActivity";
     private static final int PAGE_TASKS = 0;
     private static final int PAGE_NOTES = 1;
@@ -64,6 +63,8 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
     ImageView addIV;
     @BindView(R.id.main_tool_bar)
     Toolbar toolBar;
+
+//    private NoteEntryViewModel noteEntryViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,6 +194,7 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
 
     }
 
+
     @Override
     public void createNewNote() {
 
@@ -212,9 +214,5 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
         Toast.makeText(this, "Create new task!", Toast.LENGTH_SHORT).show();
     }
 
-//    private void updateList(List<NoteEntryM> noteEntries)
-//    {
-//        //TODO update recycler view adapter
-//    }
 
 }
