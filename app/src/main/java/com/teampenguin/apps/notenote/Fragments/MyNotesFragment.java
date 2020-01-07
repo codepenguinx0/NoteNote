@@ -1,5 +1,6 @@
 package com.teampenguin.apps.notenote.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,10 +20,11 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.teampenguin.apps.notenote.Adapters.NoteEntryListAdapter;
+import com.teampenguin.apps.notenote.Activities.EditNoteActivity;
+import com.teampenguin.apps.notenote.Activities.MainActivity;
+import com.teampenguin.apps.notenote.Adapters.NoteEntriesAdapter;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.R;
-import com.teampenguin.apps.notenote.Utils.Utils;
 import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
 
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
+public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemClickListener, NoteEntriesAdapter.NoteEntriesAdapterCallBack {
 
     public static final String TAG = "MyNotesFragment";
 
@@ -45,23 +47,12 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
     ImageView sortIV;
 
 //    private LiveData<List<NoteEntryM>> noteEntries;
-    private NoteEntryListAdapter adapter;
+    private NoteEntriesAdapter adapter;
     private NoteEntryViewModel noteEntryViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-//        NoteEntryM note1 = new NoteEntryM();
-//        note1.setNoteTitle("Note 1");
-//        NoteEntryM note2 = new NoteEntryM();
-//        note2.setNoteTitle("Note 2");
-//        NoteEntryM note3 = new NoteEntryM();
-//        note3.setNoteTitle("Note 3");
-//
-//        noteEntries.add(note1);
-//        noteEntries.add(note2);
-//        noteEntries.add(note3);
 
         noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
 
@@ -69,17 +60,21 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
 
         if(allNoteEntries!=null)
         {
-            Log.d(TAG, "onCreate: note entries count " + allNoteEntries.getValue().size());
+//            Log.d(TAG, "onCreate: note entries count " + allNoteEntries.getValue().size());
             noteEntryViewModel.getAllNoteEntries().observe(this, new Observer<List<NoteEntryM>>() {
                 @Override
                 public void onChanged(List<NoteEntryM> noteEntries) {
 
-                    updateList();
+                    if(adapter!=null)
+                    {
+                        adapter.submitList(noteEntries);
+                    }
                 }
             });
+        }else
+        {
+            Log.d(TAG, "onCreate: allNoteEntries is null");
         }
-
-
 
     }
 
@@ -90,6 +85,7 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         View view = inflater.inflate(R.layout.fragment_my_notes, container, false);
         ButterKnife.bind(this,view);
         myNotesRV.setLayoutManager(new LinearLayoutManager(getActivity()));
+        myNotesRV.setHasFixedSize(true);
 
         return view;
     }
@@ -111,17 +107,10 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
 
     private void setAdapter()
     {
-        //TODO NoteEntryListAdapter should be a ListAdapter
-//        adapter = new NoteEntryListAdapter(noteEntries);
-//        myNotesRV.setAdapter(adapter);
+        adapter = new NoteEntriesAdapter();
+        adapter.setCallBackListener(this);
+        myNotesRV.setAdapter(adapter);
     }
-
-    private void updateList()
-    {
-//        adapter.updateNoteEntries(noteEntries);
-//        adapter.notifyDataSetChanged();
-    }
-
 
     private void sortByCreateDateLToO()
     {
@@ -211,4 +200,12 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         }
     }
 
+    @Override
+    public void onNoteEntryClicked(NoteEntryM noteEntry) {
+        Intent intent = new Intent(getActivity(), EditNoteActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(MainActivity.EXTRA_NOTE_ENTRY,noteEntry);
+        startActivity(intent);
+    }
 }

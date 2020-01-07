@@ -44,6 +44,6 @@ public class NoteEntryViewModel extends AndroidViewModel {
 
     public LiveData<List<NoteEntryM>> getAllNoteEntries()
     {
-        return allNoteEntries;
+        return repository.getAllNoteEntries();
     }
 }

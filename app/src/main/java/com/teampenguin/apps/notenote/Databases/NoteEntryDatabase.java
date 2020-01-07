@@ -2,9 +2,11 @@ package com.teampenguin.apps.notenote.Databases;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.teampenguin.apps.notenote.Daos.NoteEntryDao;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
@@ -27,4 +29,11 @@ public abstract class NoteEntryDatabase extends RoomDatabase {
 
         return instance;
     }
+
+    private static RoomDatabase.Callback roomCallback = new RoomDatabase.Callback() {
+        @Override
+        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+            super.onCreate(db);
+        }
+    };
 }

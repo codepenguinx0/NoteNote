@@ -44,6 +44,7 @@ import butterknife.OnClick;
 public class MainActivity extends BaseActivity implements CommonFragmentInterface, AddNotesToDoPopupFragment.AddPopupFragmentCallBack {
 
     public static final String TAG = "MainActivity";
+    public static final String EXTRA_NOTE_ENTRY = "existingNoteEntry";
     private static final int PAGE_TASKS = 0;
     private static final int PAGE_NOTES = 1;
 
@@ -81,13 +82,6 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
         getViews();
         setViewPagerAdapter();
 
-//        noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
-//        noteEntryViewModel.getAllNoteEntries().observe(this, new Observer<List<NoteEntryM>>() {
-//            @Override
-//            public void onChanged(List<NoteEntryM> noteEntries) {
-//                updateList(noteEntries);
-//            }
-//        });
     }
 
     private void getViews() {
@@ -193,7 +187,6 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
         closeFragmentByTag(tag);
 
     }
-
 
     @Override
     public void createNewNote() {

@@ -66,8 +66,9 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     public static final int PERMISSION_REQUEST_CODE_CAMERA = 102;
     public static final int REQUEST_CODE_IMAGE_CAPTURE = 201;
     public static final int REQUEST_CODE_PICK_IMAGE = 202;
+
     private static final String appDirectoryName = "NoteNote";
-    public static final int POPUP_DELAY_MS = 300;
+    private static final int POPUP_DELAY_MS = 300;
 
     private File imageRoot;
 
@@ -92,6 +93,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
         ButterKnife.bind(this);
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            currentNote = intent.getParcelableExtra(MainActivity.EXTRA_NOTE_ENTRY);
+            if (currentNote != null) {
+                mapNoteData();
+            }
+        }
 
         noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
 
@@ -118,8 +127,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
                 editorOptionsHSV.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 hsvWidth = editorOptionsHSV.getWidth();
                 Log.d(TAG, "onGlobalLayout: HSV width " + hsvWidth);
-                if(llWidth!=0)
-                {
+                if (llWidth != 0) {
                     checkLayout();
                 }
             }
@@ -131,15 +139,12 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
                 editorOptionsLL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 llWidth = editorOptionsLL.getWidth();
                 Log.d(TAG, "onGlobalLayout: LL width " + llWidth);
-                if(hsvWidth!=0)
-                {
+                if (hsvWidth != 0) {
                     checkLayout();
                 }
             }
         });
     }
-
-
 
     @Override
     public void startActivity(Intent intent) {
@@ -158,17 +163,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         if (resultCode == Activity.RESULT_OK) {
 
-            if(requestCode==REQUEST_CODE_IMAGE_CAPTURE)
-            {
+            if (requestCode == REQUEST_CODE_IMAGE_CAPTURE) {
                 insertPhotoToEditor();
-            }else if(requestCode == REQUEST_CODE_PICK_IMAGE)
-            {
-                if(data == null)
-                {
+            } else if (requestCode == REQUEST_CODE_PICK_IMAGE) {
+                if (data == null) {
                     Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
                     return;
-                }else
-                {
+                } else {
                     Uri uri = data.getData();
 
                     Log.d(TAG, "onActivityResult: pick photo from " + uri.getPath());
@@ -207,6 +208,102 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    //<----------------Buttons---------------->
+    //region BUTTONS
+    //BOLD
+    @OnClick(R.id.editor_bold_iv)
+    public void changeTextStyleBold() {
+        editor.setBold();
+    }
+
+    //ITALIC
+    @OnClick(R.id.editor_italic_iv)
+    public void changeTextStyleItalic() {
+        editor.setItalic();
+    }
+
+    //UNDERLINE
+    @OnClick(R.id.editor_underline_iv)
+    public void changeTextStyleUnderline() {
+        editor.setUnderline();
+    }
+
+    //STRIKETHROUGH
+    @OnClick(R.id.editor_strikethrough_iv)
+    public void changeTextStyleStrikeThrough() {
+        editor.setStrikeThrough();
+    }
+
+    //UNDO
+    @OnClick(R.id.editor_undo_iv)
+    public void changeTextUndo() {
+        editor.undo();
+    }
+
+    //REDO
+    @OnClick(R.id.editor_redo_iv)
+    public void changeTextRedo() {
+        editor.redo();
+    }
+
+    //INSERT LINK
+    @OnClick(R.id.editor_link_iv)
+    public void insertLink() {
+        showInsertLinkPopup();
+    }
+
+    //BULLET LIST
+    @OnClick(R.id.editor_bulleted_list_iv)
+    public void changeTextBulletList() {
+        editor.setBullets();
+    }
+
+    //NUMBER LIST
+    @OnClick(R.id.editor_numbered_list_iv)
+    public void changeTextNumberList() {
+        editor.setNumbers();
+    }
+
+    //TODO add image
+//    @OnClick(R.id.editor_image_iv)
+//    public void insertImage() {
+//        showImagePopup();
+//    }
+
+    //CHANGE TEXT COLOUR
+    @OnClick(R.id.editor_text_colour_iv)
+    public void changeTextColour() {
+        showChangeColourPopup();
+    }
+
+    //SAVE ICON
+    @OnClick(R.id.edit_note_save_iv)
+    public void saveNote() {
+        if (currentNote == null) {
+            createNewNote();
+        } else {
+            updateNote();
+        }
+    }
+
+    //BACK
+    @OnClick(R.id.edit_note_back_iv)
+    public void back() {
+
+        String content = getEditorContent();
+
+        if (!content.isEmpty() || !Utils.isEditTextEmpty(noteTitleET)){
+            if(currentNote==null || !content.equals(currentNote.getContent())) {
+                showNotSaveAlert();
+            } else {
+                onBackPressed();
+            }
+        } else {
+            onBackPressed();
+        }
+    }
+    //endregion
+
     //<----------------functions---------------->
     //region FUNCTIONS
 
@@ -220,8 +317,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setBackgroundColor(getResources().getColor(R.color.transparent));
     }
 
-    private void clearAllFocus()
-    {
+    private void clearAllFocus() {
         editor.clearFocus();
         noteTitleET.clearFocus();
     }
@@ -256,135 +352,38 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         }
     }
 
-    private void checkLayout()
-    {
-        if(hsvWidth > llWidth)
-        {
+    private void checkLayout() {
+        if (hsvWidth > llWidth) {
             Log.d(TAG, "checkLayout: editorOptionsHSV.getWidth() > editorOptionsLL.getWidth()");
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)editorOptionsLL.getLayoutParams();
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) editorOptionsLL.getLayoutParams();
             layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
             editorOptionsLL.setLayoutParams(layoutParams);
-        }else if(hsvWidth <= llWidth)
-        {
+        } else if (hsvWidth <= llWidth) {
             Log.d(TAG, "checkLayout: editorOptionsHSV.getWidth() <= editorOptionsLL.getWidth()");
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)editorOptionsLL.getLayoutParams();
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) editorOptionsLL.getLayoutParams();
             layoutParams.gravity = Gravity.NO_GRAVITY;
             editorOptionsLL.setLayoutParams(layoutParams);
         }
     }
 
-    private void createPhotoFolder()
-    {
+    private void mapNoteData() {
+        noteTitleET.setText(currentNote.getNoteTitle());
+        editor.setHtml(currentNote.getContent());
+        //TODO set category and mood
+    }
+
+    private void createPhotoFolder() {
         imageRoot = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), appDirectoryName);
 
-        if(!imageRoot.exists())
-        {
-            if(imageRoot.mkdirs())
-            {
-                Log.d("mkdir","success");
+        if (!imageRoot.exists()) {
+            if (imageRoot.mkdirs()) {
+                Log.d("mkdir", "success");
             }
-        }else
-        {
+        } else {
             Log.d(TAG, "createPhotoFolder: imageRoot already existed");
         }
     }
-
-    //region EDITOR BUTTONS
-
-    @OnClick(R.id.editor_bold_iv)
-    public void changeTextStyleBold() {
-        editor.setBold();
-    }
-
-    @OnClick(R.id.editor_italic_iv)
-    public void changeTextStyleItalic() {
-        editor.setItalic();
-    }
-
-    @OnClick(R.id.editor_underline_iv)
-    public void changeTextStyleUnderline()
-    {
-        editor.setUnderline();
-    }
-
-    @OnClick(R.id.editor_strikethrough_iv)
-    public void changeTextStyleStrikeThrough()
-    {
-        editor.setStrikeThrough();
-
-    }
-
-    @OnClick(R.id.editor_undo_iv)
-    public void changeTextUndo()
-    {
-        editor.undo();
-    }
-
-    @OnClick(R.id.editor_redo_iv)
-    public void changeTextRedo()
-    {
-        editor.redo();
-    }
-
-    @OnClick(R.id.editor_link_iv)
-    public void insertLink() {
-
-        showInsertLinkPopup();
-    }
-
-    @OnClick(R.id.editor_bulleted_list_iv)
-    public void changeTextBulletList()
-    {
-        editor.setBullets();
-    }
-
-    @OnClick(R.id.editor_numbered_list_iv)
-    public void changeTextNumberList()
-    {
-        editor.setNumbers();
-    }
-
-    //TODO add image
-//    @OnClick(R.id.editor_image_iv)
-//    public void insertImage() {
-//        showImagePopup();
-//    }
-
-    @OnClick(R.id.editor_text_colour_iv)
-    public void changeTextColour()
-    {
-        showChangeColourPopup();
-    }
-
-    @OnClick(R.id.edit_note_save_iv)
-    public void saveNote()
-    {
-        if(currentNote == null)
-        {
-            createNewNote();
-        }else
-        {
-            updateNote();
-        }
-
-    }
-
-    @OnClick(R.id.edit_note_back_iv)
-    public void back()
-    {
-        String content = getEditorContent();
-
-        if(content!=null && !content.isEmpty())
-        {
-            showNotSaveAlert();
-        }else
-        {
-            onBackPressed();
-        }
-    }
-
-    //endregion
 
     private void showImagePopup() {
 
@@ -408,8 +407,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     }
 
-    private void showInsertLinkPopup()
-    {
+    private void showInsertLinkPopup() {
         Utils.hideSoftKeyboard(this);
 
         Runnable r = new Runnable() {
@@ -429,8 +427,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         handler.postDelayed(r, POPUP_DELAY_MS);
     }
 
-    private void showChangeColourPopup()
-    {
+    private void showChangeColourPopup() {
 //        Utils.hideSoftKeyboard(this);
 
         Runnable r = new Runnable() {
@@ -486,10 +483,10 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         addEncodeImageToEditor();
     }
 
-    private void savePhotoToExternalStorage(){
+    private void savePhotoToExternalStorage() {
 
         SavePhotoToExternalStorageAsyncTask task = new SavePhotoToExternalStorageAsyncTask();
-        task.execute(imageRoot.getAbsolutePath(),currentPhotoPath);
+        task.execute(imageRoot.getAbsolutePath(), currentPhotoPath);
     }
 
     private void resizeCurrentPhoto() {
@@ -507,8 +504,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         }
     }
 
-    private void addEncodeImageToEditor()
-    {
+    private void addEncodeImageToEditor() {
 //        String encodedImageString = "<p hidden>" + Base64.encodeToString(getByteArray(), Base64.DEFAULT) + "</p>";
 //        String encodedImageString = Base64.encodeToString(getByteArray(), Base64.DEFAULT);
 //        String htmlString  = editor.getHtml() + encodedImageString;
@@ -520,8 +516,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         //create an attachPhoto object
     }
 
-    private byte[] getByteArray()
-    {
+    private byte[] getByteArray() {
         byte[] b;
         Bitmap bm = BitmapFactory.decodeFile(currentPhotoPath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -533,14 +528,18 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     private String getEditorContent() {
 
+        if(editor.getHtml()==null)
+        {
+            return "";
+        }
+
         return editor.getHtml();
     }
 
-    private void createNewNote()
-    {
+    private void createNewNote() {
         NoteEntryM newNoteEntry = new NoteEntryM();
 
-        newNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET)?"No Title":noteTitleET.getText().toString());
+        newNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET) ? "" : noteTitleET.getText().toString());
         newNoteEntry.setContent(getEditorContent());
         newNoteEntry.setCreateDate(Utils.convertDateToString(new Date()));
         newNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
@@ -551,8 +550,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
     }
 
-    private void updateNote()
-    {
+    private void updateNote() {
         NoteEntryM updatedNoteEntry = new NoteEntryM();
 
         updatedNoteEntry.setId(currentNote.getId());
@@ -560,7 +558,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         updatedNoteEntry.setAuthorName(currentNote.getAuthorName());
         updatedNoteEntry.setCreateDate(currentNote.getCreateDate());
         updatedNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
-        updatedNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET)?"No Title":noteTitleET.getText().toString());
+        updatedNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET) ? "No Title" : noteTitleET.getText().toString());
         updatedNoteEntry.setContent(getEditorContent());
 //        updateNoteEntry.setCategory();
 //        updateNoteEntry.setMood();
@@ -570,8 +568,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
     }
 
-    private void showNotSaveAlert()
-    {
+    private void showNotSaveAlert() {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setTitle("Note not saved")
                 .setMessage("Do you wish to quit without saving?")
@@ -588,7 +585,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
                         onBackPressed();
                     }
                 })
-                .setNegativeButton("Cancel",null)
+                .setNegativeButton("Cancel", null)
                 .create();
 
         alertDialog.show();
@@ -656,13 +653,11 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         closeFragment(ChooseTextColourPopupFragment.TAG);
         editor.requestFocus();
     }
-
     //endregion
 
     //region INNER CLASSES
 
-    private static class SavePhotoToExternalStorageAsyncTask extends AsyncTask<String,Void,Void>
-    {
+    private static class SavePhotoToExternalStorageAsyncTask extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String... strings) {
 
@@ -671,20 +666,18 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             String fileName = "image_" + Utils.getTimeStringForFileName(currentTime) + ".jpg";
             File outputImage = new File(strings[0] + File.separator + fileName);
 
-            try{
+            try {
                 outputImage.createNewFile();
                 Bitmap bmp = BitmapFactory.decodeFile(strings[1]);
                 fos = new FileOutputStream(outputImage);
-                bmp.compress(Bitmap.CompressFormat.JPEG,100,fos);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 Log.d(TAG, "SavePhotoToExternalStorageAsyncTask doInBackground: saved!");
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
 
             } finally {
 
-                if(fos!=null)
-                {
+                if (fos != null) {
                     try {
                         Log.d(TAG, "doInBackground: close outputstream");
                         fos.close();

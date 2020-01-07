@@ -3,6 +3,7 @@ package com.teampenguin.apps.notenote.Repositories;
 
 import android.app.Application;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -14,6 +15,7 @@ import java.util.List;
 
 public class NoteEntryRepository {
 
+    private static final String TAG = "NoteEntryRepository";
     private NoteEntryDao noteEntryDao;
     private LiveData<List<NoteEntryM>> allNoteEntries;
 
@@ -26,6 +28,7 @@ public class NoteEntryRepository {
 
     public void insert(NoteEntryM noteEntry)
     {
+        Log.d(TAG, "insert: " + noteEntry.getCreateDate());
         new InsertNoteEntryAsynTask(noteEntryDao).execute(noteEntry);
     }
 

@@ -1,5 +1,8 @@
 package com.teampenguin.apps.notenote.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -9,7 +12,7 @@ import com.teampenguin.apps.notenote.Utils.Utils;
 import java.util.Date;
 
 @Entity(tableName = "note_entries")
-public class NoteEntryM {
+public class NoteEntryM implements Parcelable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
@@ -41,19 +44,43 @@ public class NoteEntryM {
     @ColumnInfo(name = "is_active")
     private boolean isActive;
 
-
     public NoteEntryM()
     {
         authorName = "";
         authorId = 0;
         noteTitle = "No Title";
         createDate = Utils.convertDateToString(new Date());
-        modifiedDate = "";
+        modifiedDate = Utils.convertDateToString(new Date());
         content = "";
         category = 0;
         mood = 0;
         isActive = true;
     }
+
+    protected NoteEntryM(Parcel in) {
+        id = in.readInt();
+        authorName = in.readString();
+        authorId = in.readInt();
+        noteTitle = in.readString();
+        createDate = in.readString();
+        modifiedDate = in.readString();
+        content = in.readString();
+        category = in.readInt();
+        mood = in.readInt();
+        isActive = in.readByte() != 0;
+    }
+
+    public static final Creator<NoteEntryM> CREATOR = new Creator<NoteEntryM>() {
+        @Override
+        public NoteEntryM createFromParcel(Parcel in) {
+            return new NoteEntryM(in);
+        }
+
+        @Override
+        public NoteEntryM[] newArray(int size) {
+            return new NoteEntryM[size];
+        }
+    };
 
     public int getId() {
         return id;
@@ -133,5 +160,24 @@ public class NoteEntryM {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(id);
+        parcel.writeString(authorName);
+        parcel.writeInt(authorId);
+        parcel.writeString(noteTitle);
+        parcel.writeString(createDate);
+        parcel.writeString(modifiedDate);
+        parcel.writeString(content);
+        parcel.writeInt(category);
+        parcel.writeInt(mood);
+        parcel.writeByte((byte) (isActive ? 1 : 0));
     }
 }
