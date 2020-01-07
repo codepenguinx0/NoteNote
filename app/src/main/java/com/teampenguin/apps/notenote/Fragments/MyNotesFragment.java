@@ -25,6 +25,7 @@ import com.teampenguin.apps.notenote.Activities.MainActivity;
 import com.teampenguin.apps.notenote.Adapters.NoteEntriesAdapter;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.R;
+import com.teampenguin.apps.notenote.Utils.Utils;
 import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
 
 import java.util.ArrayList;
@@ -46,7 +47,6 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
     @BindView(R.id.my_notes_sort_iv)
     ImageView sortIV;
 
-//    private LiveData<List<NoteEntryM>> noteEntries;
     private NoteEntriesAdapter adapter;
     private NoteEntryViewModel noteEntryViewModel;
 
@@ -114,62 +114,58 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
 
     private void sortByCreateDateLToO()
     {
-//        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
-//        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
-//            @Override
-//            public int compare(NoteEntryM o1, NoteEntryM o2) {
-//                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
-//                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
-//                return d1.compareTo(d2);
-//            }
-//        });
-//
-//        adapter.setNewSortedNoteEntries(sortedNoteEntries);
-//        adapter.notifyDataSetChanged();
+        ArrayList<NoteEntryM> sortedList = new ArrayList<>(adapter.getCurrentList());
+        Collections.sort(sortedList, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
+                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
+                return d1.compareTo(d2);
+            }
+        });
+
+        adapter.submitList(sortedList);
     }
 
     private void sortByCreateDateOToL()
     {
-//        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
-//        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
-//            @Override
-//            public int compare(NoteEntryM o1, NoteEntryM o2) {
-//                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
-//                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
-//                return d2.compareTo(d1);
-//            }
-//        });
-//
-//        adapter.setNewSortedNoteEntries(sortedNoteEntries);
-//        adapter.notifyDataSetChanged();
+        ArrayList<NoteEntryM> sortedList = new ArrayList<>(adapter.getCurrentList());
+        Collections.sort(sortedList, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
+                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
+                return d2.compareTo(d1);
+            }
+        });
+
+        adapter.submitList(sortedList);
     }
 
     private void sortByTitleAToZ()
     {
-//        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
-//        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
-//            @Override
-//            public int compare(NoteEntryM o1, NoteEntryM o2) {
-//                return o1.getNoteTitle().compareTo(o2.getNoteTitle());
-//            }
-//        });
-//
-//        adapter.setNewSortedNoteEntries(sortedNoteEntries);
-//        adapter.notifyDataSetChanged();
+        ArrayList<NoteEntryM> sortedList = new ArrayList<>(adapter.getCurrentList());
+        Collections.sort(sortedList, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                return o1.getNoteTitle().compareTo(o2.getNoteTitle());
+            }
+        });
+
+        adapter.submitList(sortedList);
     }
 
     private void sortByTitleZToA()
     {
-//        ArrayList<NoteEntryM> sortedNoteEntries = new ArrayList<>(noteEntries);
-//        Collections.sort(sortedNoteEntries, new Comparator<NoteEntryM>() {
-//            @Override
-//            public int compare(NoteEntryM o1, NoteEntryM o2) {
-//                return o2.getNoteTitle().compareTo(o1.getNoteTitle());
-//            }
-//        });
-//
-//        adapter.setNewSortedNoteEntries(sortedNoteEntries);
-//        adapter.notifyDataSetChanged();
+        ArrayList<NoteEntryM> sortedList = new ArrayList<>(adapter.getCurrentList());
+        Collections.sort(sortedList, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                return o2.getNoteTitle().compareTo(o1.getNoteTitle());
+            }
+        });
+
+        adapter.submitList(sortedList);
     }
 
     @Override
