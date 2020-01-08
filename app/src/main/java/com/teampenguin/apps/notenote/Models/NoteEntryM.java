@@ -36,7 +36,7 @@ public class NoteEntryM implements Parcelable {
     private String content;
 
     @ColumnInfo(name = "note_category")
-    private int category;
+    private String category;
 
     @ColumnInfo(name = "note_mood")
     private int mood;
@@ -52,7 +52,7 @@ public class NoteEntryM implements Parcelable {
         createDate = Utils.convertDateToString(new Date());
         modifiedDate = Utils.convertDateToString(new Date());
         content = "";
-        category = 0;
+        category = "";
         mood = 0;
         isActive = true;
     }
@@ -65,7 +65,7 @@ public class NoteEntryM implements Parcelable {
         createDate = in.readString();
         modifiedDate = in.readString();
         content = in.readString();
-        category = in.readInt();
+        category = in.readString();
         mood = in.readInt();
         isActive = in.readByte() != 0;
     }
@@ -146,11 +146,11 @@ public class NoteEntryM implements Parcelable {
         this.mood = mood;
     }
 
-    public int getCategory() {
+    public String getCategory() {
         return category;
     }
 
-    public void setCategory(int category) {
+    public void setCategory(String category) {
         this.category = category;
     }
 
@@ -176,7 +176,7 @@ public class NoteEntryM implements Parcelable {
         parcel.writeString(createDate);
         parcel.writeString(modifiedDate);
         parcel.writeString(content);
-        parcel.writeInt(category);
+        parcel.writeString(category);
         parcel.writeInt(mood);
         parcel.writeByte((byte) (isActive ? 1 : 0));
     }

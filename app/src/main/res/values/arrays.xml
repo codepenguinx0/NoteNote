@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="noteCategory">
+        <item>No Category</item>
         <item>General</item>
         <item>Personal</item>
         <item>Ideas</item>

@@ -37,6 +37,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.teampenguin.apps.notenote.Fragments.CategoryPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.ChooseTextColourPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
 import com.teampenguin.apps.notenote.Fragments.InsertLinkPopupFragment;
@@ -297,8 +298,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         String content = getEditorContent();
 
-        if (!content.isEmpty() || !Utils.isEditTextEmpty(noteTitleET)){
-            if(currentNote==null || !content.equals(currentNote.getContent())) {
+        if (!content.isEmpty() || !Utils.isEditTextEmpty(noteTitleET)) {
+            if (currentNote == null || !content.equals(currentNote.getContent())) {
                 showNotSaveAlert();
             } else {
                 onBackPressed();
@@ -310,8 +311,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     //CATEGORY
     @OnClick(R.id.edit_note_category_rl)
-    public void chooseCategory()
-    {
+    public void chooseCategory() {
         showCategoryPopup();
     }
     //endregion
@@ -452,13 +452,26 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         delayPopup(r);
     }
 
-    private void showCategoryPopup()
-    {
+    private void showCategoryPopup() {
+
+        Utils.hideSoftKeyboard(this);
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                CategoryPopupFragment fragment = new CategoryPopupFragment(EditNoteActivity.this);
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.edit_note_frame, fragment, CategoryPopupFragment.TAG)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .addToBackStack(CategoryPopupFragment.TAG)
+                        .commit();
+            }
+        };
+
+        delayPopup(r);
 
     }
 
-    private void delayPopup(Runnable r)
-    {
+    private void delayPopup(Runnable r) {
         //delay the popup for 300ms for the keyboard to hide first
         Handler handler = new Handler();
         handler.postDelayed(r, POPUP_DELAY_MS);
@@ -545,8 +558,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     private String getEditorContent() {
 
-        if(editor.getHtml()==null)
-        {
+        if (editor.getHtml() == null) {
             return "";
         }
 

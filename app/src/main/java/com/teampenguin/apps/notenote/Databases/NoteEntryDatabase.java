@@ -11,7 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import com.teampenguin.apps.notenote.Daos.NoteEntryDao;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
 
-@Database(entities = {NoteEntryM.class}, version = 1)
+@Database(entities = {NoteEntryM.class}, version = 2)
 public abstract class NoteEntryDatabase extends RoomDatabase {
 
     private static NoteEntryDatabase instance = null;

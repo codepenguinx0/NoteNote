@@ -96,6 +96,34 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         setAdapter();
     }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+
+        switch (item.getItemId())
+        {
+            case R.id.sorting_popup_menu_create_date:
+                Log.d(TAG, "onMenuItemClick: create date");
+                sortByCreateDateLToO();
+                return true;
+            case R.id.sorting_popup_menu_title_a_z:
+                Log.d(TAG, "onMenuItemClick: title a to z");
+                sortByTitleAToZ();
+                return true;
+            case R.id.sorting_popup_menu_title_z_a:
+                Log.d(TAG, "onMenuItemClick: title z to a");
+                sortByTitleZToA();
+                return true;
+            case R.id.sorting_popup_menu_category:
+                Log.d(TAG, "onMenuItemClick: category");
+                return true;
+            case R.id.sorting_popup_menu_mood:
+                Log.d(TAG, "onMenuItemClick: mood");
+                return true;
+            default:
+                return false;
+        }
+    }
+
     @OnClick(R.id.my_notes_sort_iv)
     public void showSortingPopupMenu()
     {
@@ -168,33 +196,6 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         adapter.submitList(sortedList);
     }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-
-        switch (item.getItemId())
-        {
-            case R.id.sorting_popup_menu_create_date:
-                Log.d(TAG, "onMenuItemClick: create date");
-                sortByCreateDateLToO();
-                return true;
-            case R.id.sorting_popup_menu_title_a_z:
-                Log.d(TAG, "onMenuItemClick: title a to z");
-                sortByTitleAToZ();
-                return true;
-            case R.id.sorting_popup_menu_title_z_a:
-                Log.d(TAG, "onMenuItemClick: title z to a");
-                sortByTitleZToA();
-                return true;
-            case R.id.sorting_popup_menu_category:
-                Log.d(TAG, "onMenuItemClick: category");
-                return true;
-            case R.id.sorting_popup_menu_mood:
-                Log.d(TAG, "onMenuItemClick: mood");
-                return true;
-            default:
-                return false;
-        }
-    }
 
     @Override
     public void onNoteEntryClicked(NoteEntryM noteEntry) {

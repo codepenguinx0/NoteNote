@@ -13,6 +13,7 @@ public class SharedPreferencesHelper {
     public static final String SHARE_PREFERENCE_NAME = "NoteNoteSP";
     public static final String SP_NOTE_CATEGORY = "noteCategories";
 
+    //region Edit Note Category
     public static boolean addNewNoteCategory(Context context, String newCategoryName)
     {
         SharedPreferences sp = context.getSharedPreferences(SHARE_PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -35,6 +36,23 @@ public class SharedPreferencesHelper {
         return false;
     }
 
+    public static boolean deleteNoteCategory(Context context, String category)
+    {
+        SharedPreferences sp = context.getSharedPreferences(SHARE_PREFERENCE_NAME, Context.MODE_PRIVATE);
+
+        if(sp!=null)
+        {
+            Set<String> savedCategories = sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<>());
+
+            if(savedCategories.remove(category))
+            {
+                return sp.edit().putStringSet(SP_NOTE_CATEGORY, savedCategories).commit();
+            }
+        }
+
+        return false;
+    }
+
     public static Set<String> getNoteCategories(Context context)
     {
         Set<String> categories = new HashSet<>();
@@ -46,4 +64,7 @@ public class SharedPreferencesHelper {
 
         return categories;
     }
+
+    //endregion
+
 }

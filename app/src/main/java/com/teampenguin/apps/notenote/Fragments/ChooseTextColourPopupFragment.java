@@ -81,8 +81,8 @@ public class ChooseTextColourPopupFragment extends Fragment {
             final String colour = colours.get(i);
 
             Button colourButton = new Button(getActivity());
-            ViewGroup.MarginLayoutParams mlp = new ViewGroup.MarginLayoutParams(100,100);
-            mlp.setMargins(10,10,10,10);
+            ViewGroup.MarginLayoutParams mlp = new ViewGroup.MarginLayoutParams(150,150);
+            mlp.setMargins(20,20,20,20);
             colourButton.setLayoutParams(mlp);
             colourButton.setBackgroundColor(Color.parseColor(colour));
             colourButton.setOnClickListener(new View.OnClickListener() {
