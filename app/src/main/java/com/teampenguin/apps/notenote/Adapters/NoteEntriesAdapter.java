@@ -1,8 +1,10 @@
 package com.teampenguin.apps.notenote.Adapters;
 
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -61,8 +63,10 @@ public class NoteEntriesAdapter extends ListAdapter<NoteEntryM, NoteEntriesAdapt
         NoteEntryM noteEntry = getItem(position);
         holder.titleTV.setText(noteEntry.getNoteTitle().isEmpty()?"No Title":noteEntry.getNoteTitle());
         holder.createDateTV.setText(noteEntry.getModifiedDate());
+
         //TODO show category name
         holder.categoryTV.setText(String.valueOf(noteEntry.getCategory()));
+        //TODO change mood icon
     }
 
     public NoteEntryM getNoteEntry(int position)
@@ -78,6 +82,8 @@ public class NoteEntriesAdapter extends ListAdapter<NoteEntryM, NoteEntriesAdapt
         public TextView createDateTV;
         @BindView(R.id.note_entry_category_tv)
         public TextView categoryTV;
+        @BindView(R.id.note_entry_mood_iv)
+        public ImageView moodIV;
 
         public NoteEntriesViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -22,6 +22,8 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -80,6 +82,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     HorizontalScrollView editorOptionsHSV;
     @BindView(R.id.edit_note_editor_options_ll)
     LinearLayout editorOptionsLL;
+    @BindView(R.id.edit_note_category_tv)
+    TextView categoryTV;
 
     private String currentPhotoPath;
     private int hsvWidth;
@@ -210,6 +214,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     //<----------------Buttons---------------->
     //region BUTTONS
+
     //BOLD
     @OnClick(R.id.editor_bold_iv)
     public void changeTextStyleBold() {
@@ -302,6 +307,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             onBackPressed();
         }
     }
+
+    //CATEGORY
+    @OnClick(R.id.edit_note_category_rl)
+    public void chooseCategory()
+    {
+        showCategoryPopup();
+    }
     //endregion
 
     //<----------------functions---------------->
@@ -388,7 +400,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     private void showImagePopup() {
 
         Utils.hideSoftKeyboard(this);
-
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -401,15 +412,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
         };
 
-        //delay the popup for 300ms for the keyboard to hide first
-        Handler handler = new Handler();
-        handler.postDelayed(r, POPUP_DELAY_MS);
+        delayPopup(r);
 
     }
 
     private void showInsertLinkPopup() {
-        Utils.hideSoftKeyboard(this);
 
+        Utils.hideSoftKeyboard(this);
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -422,14 +431,12 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
         };
 
-        //delay the popup for 300ms for the keyboard to hide first
-        Handler handler = new Handler();
-        handler.postDelayed(r, POPUP_DELAY_MS);
+        delayPopup(r);
     }
 
     private void showChangeColourPopup() {
-//        Utils.hideSoftKeyboard(this);
 
+//        Utils.hideSoftKeyboard(this);
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -442,6 +449,16 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
         };
 
+        delayPopup(r);
+    }
+
+    private void showCategoryPopup()
+    {
+
+    }
+
+    private void delayPopup(Runnable r)
+    {
         //delay the popup for 300ms for the keyboard to hide first
         Handler handler = new Handler();
         handler.postDelayed(r, POPUP_DELAY_MS);
