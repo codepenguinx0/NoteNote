@@ -36,6 +36,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     @BindView(R.id.category_popup_categories_rv)
     RecyclerView categoriesRV;
 
+    private SharedPreferencesHelper spHelper;
     private CommonFragmentInterface commonListener = null;
     private CategoryListAdapter adapter = null;
 
@@ -75,7 +76,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
                 return;
             }
 
-            if(SharedPreferencesHelper.addNewNoteCategory(getActivity().getApplicationContext(), newCategoryName))
+            if(SharedPreferencesHelper.addNewNoteCategory(newCategoryName))
             {
                 Toast.makeText(getActivity(), "Added!", Toast.LENGTH_SHORT).show();
                 Utils.hideSoftKeyboard(getActivity());
@@ -111,7 +112,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     {
         List<String> tempList = Arrays.asList(getActivity().getResources().getStringArray(R.array.noteCategory));
         ArrayList<String> categories = new ArrayList<>(tempList);
-        Set<String> savedCategories = SharedPreferencesHelper.getNoteCategories(getActivity().getApplicationContext());
+        Set<String> savedCategories = SharedPreferencesHelper.getNoteCategories();
         for(String category : savedCategories)
         {
             categories.add(category);
@@ -122,7 +123,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     @Override
     public void onCategoryDelete(String category) {
 
-        if(SharedPreferencesHelper.deleteNoteCategory(getActivity().getApplicationContext(), category))
+        if(SharedPreferencesHelper.deleteNoteCategory(category))
         {
             Toast.makeText(getActivity(), "Removed " + category, Toast.LENGTH_SHORT).show();
             getListForAdapter();
