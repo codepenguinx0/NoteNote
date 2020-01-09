@@ -36,9 +36,10 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     @BindView(R.id.category_popup_categories_rv)
     RecyclerView categoriesRV;
 
-    private SharedPreferencesHelper spHelper;
     private CommonFragmentInterface commonListener = null;
     private CategoryListAdapter adapter = null;
+
+    private String chosenCategory = null;
 
     public CategoryPopupFragment(CommonFragmentInterface commonListener)
     {
@@ -94,6 +95,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     @OnClick(R.id.category_popup_close_iv)
     public void close()
     {
+        //TODO if chosenCategory is not null, update the chosenCategory of the note
         if(commonListener!=null)
         {
             commonListener.closeFragment(TAG);
@@ -102,7 +104,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
 
     private void setAdapter()
     {
-        adapter = new CategoryListAdapter();
+        adapter = new CategoryListAdapter(chosenCategory);
         adapter.setCallBackListener(this);
         getListForAdapter();
         categoriesRV.setAdapter(adapter);
@@ -128,5 +130,11 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
             Toast.makeText(getActivity(), "Removed " + category, Toast.LENGTH_SHORT).show();
             getListForAdapter();
         }
+    }
+
+    @Override
+    public void onCategoryChosen(String category) {
+        Toast.makeText(getActivity(), "chosen " + category, Toast.LENGTH_SHORT).show();
+        chosenCategory = category;
     }
 }
