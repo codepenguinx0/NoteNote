@@ -1,5 +1,6 @@
 package com.teampenguin.apps.notenote.Fragments;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -137,14 +139,40 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
         adapter.submitList(categories);
     }
 
+    private void showDeleteCategoryAlert(final String category)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Delete Category")
+                .setMessage("Are you sure to delete this category?\n It will affect notes that are tagged under this category")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        removeCategory(category);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+
+        alertDialog.show();
+    }
+
+    private void removeCategory(String category)
+    {
+        if(SharedPreferencesHelper.deleteNoteCategory(category))
+        {
+            getListForAdapter();
+            //reset the category of notes of the deleted category
+            Toast.makeText(getActivity(), "Removed " + category, Toast.LENGTH_SHORT).show();
+        }else
+        {
+            Toast.makeText(getActivity(), "Failed" + category, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public void onCategoryDelete(String category) {
 
-        if(SharedPreferencesHelper.deleteNoteCategory(category))
-        {
-            Toast.makeText(getActivity(), "Removed " + category, Toast.LENGTH_SHORT).show();
-            getListForAdapter();
-        }
+        showDeleteCategoryAlert(category);
     }
 
     @Override

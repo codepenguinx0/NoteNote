@@ -47,6 +47,11 @@ public class NoteEntryRepository {
         new DeleteAllNoteEntriesAsynTask(noteEntryDao).execute();
     }
 
+    public void resetNotesCategory(String deletedCategory)
+    {
+        new ResetNotesCategoryAsyncTask(noteEntryDao).execute(deletedCategory);
+    }
+
     public LiveData<List<NoteEntryM>> getAllNoteEntries()
     {
         return allNoteEntries;
@@ -120,6 +125,21 @@ public class NoteEntryRepository {
         protected Void doInBackground(Void... voids) {
 
             noteEntryDao.deleteAllNoteEntries();
+            return null;
+        }
+    }
+
+    private static class ResetNotesCategoryAsyncTask extends AsyncTask<String, Void, Void>
+    {
+        private NoteEntryDao noteEntryDao;
+
+        public ResetNotesCategoryAsyncTask(NoteEntryDao noteEntryDao)
+        {
+            this.noteEntryDao = noteEntryDao;
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
             return null;
         }
     }

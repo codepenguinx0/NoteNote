@@ -28,4 +28,7 @@ public interface NoteEntryDao {
 
     @Query("DELETE FROM note_entries")
     void deleteAllNoteEntries();
+
+    @Query("UPDATE note_entries SET note_category = 'No Category' WHERE note_category = :deleteCategory")
+    void resetNotesCategory(String deleteCategory);
 }
