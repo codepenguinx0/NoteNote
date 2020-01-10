@@ -14,6 +14,8 @@ import java.util.Date;
 @Entity(tableName = "note_entries")
 public class NoteEntryM implements Parcelable {
 
+    public static final String DEFAULT_CATEGORY = "No Category";
+
     @PrimaryKey(autoGenerate = true)
     private int id;
 
@@ -52,7 +54,7 @@ public class NoteEntryM implements Parcelable {
         createDate = Utils.convertDateToString(new Date());
         modifiedDate = Utils.convertDateToString(new Date());
         content = "";
-        category = "";
+        category = DEFAULT_CATEGORY;
         mood = 0;
         isActive = true;
     }

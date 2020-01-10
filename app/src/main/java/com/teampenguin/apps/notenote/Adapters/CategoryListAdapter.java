@@ -43,7 +43,7 @@ public class CategoryListAdapter extends ListAdapter<String, CategoryListAdapter
 
     private CategoryAdapterCallBack callBackListener = null;
 
-    public CategoryListAdapter(@Nullable String chosenCategory) {
+    public CategoryListAdapter(String chosenCategory) {
         super(DIFF_CALLBACK);
         this.chosenCategory = chosenCategory;
         cardViews = new ArrayList<>();
@@ -72,6 +72,11 @@ public class CategoryListAdapter extends ListAdapter<String, CategoryListAdapter
                 cardViews.add(cardView);
             }
 
+            if(isChosenCategory(position))
+            {
+                updateCardViewsColours(cardView);
+            }
+
             holder.categoryNameTV.setText(getItem(position));
 
             if(getCurrentList().indexOf(getItem(position)) < PRESET_CATEGORY_NUMBER)
@@ -98,13 +103,23 @@ public class CategoryListAdapter extends ListAdapter<String, CategoryListAdapter
         }
     }
 
+    private boolean isChosenCategory(int pos)
+    {
+        int posOfChosenCategory = getCurrentList().indexOf(chosenCategory);
+        if(posOfChosenCategory!=-1 && posOfChosenCategory == pos)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public class CategoryAdapterViewHold extends RecyclerView.ViewHolder{
 
         @BindView(R.id.adapter_category_list_category_tv)
         TextView categoryNameTV;
         @BindView(R.id.delete_category_iv)
         ImageView deleteCategoryIV;
-
 
         public CategoryAdapterViewHold(@NonNull View itemView) {
             super(itemView);

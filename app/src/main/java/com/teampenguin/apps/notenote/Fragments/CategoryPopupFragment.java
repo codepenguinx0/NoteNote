@@ -37,13 +37,20 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     RecyclerView categoriesRV;
 
     private CommonFragmentInterface commonListener = null;
+    private CategoryPopupCallBack callBackListener = null;
     private CategoryListAdapter adapter = null;
 
     private String chosenCategory = null;
 
-    public CategoryPopupFragment(CommonFragmentInterface commonListener)
+    public CategoryPopupFragment(CategoryPopupCallBack callBackListener, CommonFragmentInterface commonListener)
     {
+        this.callBackListener = callBackListener;
         this.commonListener = commonListener;
+    }
+
+    public void setNoteCategory(String noteCategory)
+    {
+        chosenCategory = noteCategory;
     }
 
     @Nullable
@@ -96,6 +103,14 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     public void close()
     {
         //TODO if chosenCategory is not null, update the chosenCategory of the note
+        if(chosenCategory!=null)
+        {
+            if(callBackListener!=null)
+            {
+                callBackListener.onCategoryChosen(chosenCategory);
+            }
+        }
+
         if(commonListener!=null)
         {
             commonListener.closeFragment(TAG);
@@ -136,5 +151,9 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     public void onCategoryChosen(String category) {
         Toast.makeText(getActivity(), "chosen " + category, Toast.LENGTH_SHORT).show();
         chosenCategory = category;
+    }
+
+    public interface CategoryPopupCallBack {
+        void onCategoryChosen(String category);
     }
 }

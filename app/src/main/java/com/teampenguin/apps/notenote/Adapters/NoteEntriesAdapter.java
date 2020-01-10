@@ -63,8 +63,6 @@ public class NoteEntriesAdapter extends ListAdapter<NoteEntryM, NoteEntriesAdapt
         NoteEntryM noteEntry = getItem(position);
         holder.titleTV.setText(noteEntry.getNoteTitle().isEmpty()?"No Title":noteEntry.getNoteTitle());
         holder.createDateTV.setText(noteEntry.getModifiedDate());
-
-        //TODO show category name
         holder.categoryTV.setText(String.valueOf(noteEntry.getCategory()));
         //TODO change mood icon
     }

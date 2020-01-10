@@ -61,7 +61,7 @@ import butterknife.OnClick;
 import jp.wasabeef.richeditor.RichEditor;
 
 public class EditNoteActivity extends AppCompatActivity implements PickImagePopupFragment.PickImagePopupCallBack, CommonFragmentInterface,
-        InsertLinkPopupFragment.InsertLinkPopupCallBack, ChooseTextColourPopupFragment.ChooseTextColourPopupCallBack {
+        InsertLinkPopupFragment.InsertLinkPopupCallBack, ChooseTextColourPopupFragment.ChooseTextColourPopupCallBack, CategoryPopupFragment.CategoryPopupCallBack {
 
     public static final String TAG = "EditNoteActivity";
 
@@ -92,12 +92,15 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     private NoteEntryViewModel noteEntryViewModel;
     private NoteEntryM currentNote = null;
+    private String newChosenCategory = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
+
         ButterKnife.bind(this);
+        noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -107,48 +110,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
         }
 
-        noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
+        if (currentNote == null) {
+            categoryTV.setText(NoteEntryM.DEFAULT_CATEGORY);
+        }
 
         checkPermissions();
         initializeEditor();
-        checkLayout();
+        setOnGlobalLayoutListener();
 
-        final View activityRootView = findViewById(R.id.edit_note_activity_root);
-        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
-                Log.d(TAG, "onGlobalLayout: heightDiff" + heightDiff);
-                //the normal difference between the activityRootView and the real RootView is around 200 (189)
-                if (heightDiff > 10 && heightDiff < 300) {
-                    clearAllFocus();
-                }
-            }
-        });
-
-        editorOptionsHSV.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                editorOptionsHSV.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                hsvWidth = editorOptionsHSV.getWidth();
-                Log.d(TAG, "onGlobalLayout: HSV width " + hsvWidth);
-                if (llWidth != 0) {
-                    checkLayout();
-                }
-            }
-        });
-
-        editorOptionsLL.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                editorOptionsLL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                llWidth = editorOptionsLL.getWidth();
-                Log.d(TAG, "onGlobalLayout: LL width " + llWidth);
-                if (hsvWidth != 0) {
-                    checkLayout();
-                }
-            }
-        });
     }
 
     @Override
@@ -296,17 +265,34 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     @OnClick(R.id.edit_note_back_iv)
     public void back() {
 
+        //show not save alert if either content/title/category has been changed
         String content = getEditorContent();
 
-        if (!content.isEmpty() || !Utils.isEditTextEmpty(noteTitleET)) {
+         if (newChosenCategory != null) {
+
+            if (currentNote!=null && !newChosenCategory.equals(currentNote.getCategory())) {
+                showNotSaveAlert();
+                return;
+            }
+        }
+
+        if (content != null && !content.isEmpty()) {
             if (currentNote == null || !content.equals(currentNote.getContent())) {
                 showNotSaveAlert();
-            } else {
-                onBackPressed();
+                return;
             }
-        } else {
-            onBackPressed();
         }
+
+        if (!Utils.isEditTextEmpty(noteTitleET)) {
+
+            if(currentNote == null || !noteTitleET.getText().toString().equals(currentNote.getNoteTitle()))
+            {
+                showNotSaveAlert();
+                return;
+            }
+        }
+
+        onBackPressed();
     }
 
     //CATEGORY
@@ -378,9 +364,49 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         }
     }
 
+    private void setOnGlobalLayoutListener() {
+        final View activityRootView = findViewById(R.id.edit_note_activity_root);
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
+                Log.d(TAG, "onGlobalLayout: heightDiff" + heightDiff);
+                //the normal difference between the activityRootView and the real RootView is around 200 (189)
+                if (heightDiff > 10 && heightDiff < 300) {
+                    clearAllFocus();
+                }
+            }
+        });
+
+        editorOptionsHSV.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                editorOptionsHSV.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                hsvWidth = editorOptionsHSV.getWidth();
+                Log.d(TAG, "onGlobalLayout: HSV width " + hsvWidth);
+                if (llWidth != 0) {
+                    checkLayout();
+                }
+            }
+        });
+
+        editorOptionsLL.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                editorOptionsLL.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                llWidth = editorOptionsLL.getWidth();
+                Log.d(TAG, "onGlobalLayout: LL width " + llWidth);
+                if (hsvWidth != 0) {
+                    checkLayout();
+                }
+            }
+        });
+    }
+
     private void mapNoteData() {
         noteTitleET.setText(currentNote.getNoteTitle());
         editor.setHtml(currentNote.getContent());
+        categoryTV.setText(currentNote.getCategory());
         //TODO set category and mood
     }
 
@@ -458,7 +484,22 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                CategoryPopupFragment fragment = new CategoryPopupFragment(EditNoteActivity.this);
+                CategoryPopupFragment fragment = new CategoryPopupFragment(EditNoteActivity.this, EditNoteActivity.this);
+
+                if (currentNote != null) {
+                    if (newChosenCategory != null) {
+                        fragment.setNoteCategory(newChosenCategory);
+                    } else {
+                        fragment.setNoteCategory(currentNote.getCategory());
+                    }
+                } else {
+                    if (newChosenCategory != null) {
+                        fragment.setNoteCategory(newChosenCategory);
+                    } else {
+                        fragment.setNoteCategory(NoteEntryM.DEFAULT_CATEGORY);
+                    }
+                }
+
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.edit_note_frame, fragment, CategoryPopupFragment.TAG)
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -566,12 +607,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     private void createNewNote() {
+
         NoteEntryM newNoteEntry = new NoteEntryM();
 
         newNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET) ? "" : noteTitleET.getText().toString());
         newNoteEntry.setContent(getEditorContent());
         newNoteEntry.setCreateDate(Utils.convertDateToString(new Date()));
         newNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
+        newNoteEntry.setCategory(newChosenCategory == null ? NoteEntryM.DEFAULT_CATEGORY : newChosenCategory);
         noteEntryViewModel.insert(newNoteEntry);
 
         currentNote = newNoteEntry;
@@ -580,6 +623,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     private void updateNote() {
+
         NoteEntryM updatedNoteEntry = new NoteEntryM();
 
         updatedNoteEntry.setId(currentNote.getId());
@@ -587,9 +631,9 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         updatedNoteEntry.setAuthorName(currentNote.getAuthorName());
         updatedNoteEntry.setCreateDate(currentNote.getCreateDate());
         updatedNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
-        updatedNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET) ? "No Title" : noteTitleET.getText().toString());
+        updatedNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET) ? "" : noteTitleET.getText().toString());
         updatedNoteEntry.setContent(getEditorContent());
-//        updateNoteEntry.setCategory();
+        updatedNoteEntry.setCategory(newChosenCategory == null ? currentNote.getCategory() : newChosenCategory);
 //        updateNoteEntry.setMood();
         noteEntryViewModel.update(updatedNoteEntry);
         currentNote = updatedNoteEntry;
@@ -681,6 +725,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setTextColor(Color.parseColor(colour));
         closeFragment(ChooseTextColourPopupFragment.TAG);
         editor.requestFocus();
+    }
+
+    @Override
+    public void onCategoryChosen(String category) {
+
+        newChosenCategory = category;
+        categoryTV.setText(category);
     }
     //endregion
 

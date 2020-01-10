@@ -3,7 +3,6 @@ package com.teampenguin.apps.notenote.Utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,8 +27,6 @@ public class SharedPreferencesHelper {
     //region Edit Note Category
     public static boolean addNewNoteCategory(String newCategoryName)
     {
-//        SharedPreferences sp = context.getSharedPreferences(SHARE_PREFERENCE_NAME, Context.MODE_PRIVATE);
-
         if(sp!=null)
         {
             SharedPreferences.Editor editor = sp.edit();
@@ -41,7 +38,6 @@ public class SharedPreferencesHelper {
 
             if(savedCategories.contains(newCategoryName))
             {
-//                Toast.makeText(context, "This category already exists", Toast.LENGTH_SHORT).show();
                 return false;
             }
 
@@ -50,18 +46,14 @@ public class SharedPreferencesHelper {
             editor.remove(SP_NOTE_CATEGORY);
             editor.putStringSet(SP_NOTE_CATEGORY, temp);
             editor.apply();
-//            editor.commit();
             return true;
         }
 
-//        Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
         return false;
     }
 
     public static boolean deleteNoteCategory(String category)
     {
-//        SharedPreferences sp = context.getSharedPreferences(SHARE_PREFERENCE_NAME, Context.MODE_PRIVATE);
-
         if(sp!=null)
         {
             SharedPreferences.Editor editor = sp.edit();
@@ -74,9 +66,7 @@ public class SharedPreferencesHelper {
                 editor.remove(SP_NOTE_CATEGORY);
                 editor.putStringSet(SP_NOTE_CATEGORY, temp);
                 editor.apply();
-//                editor.commit();
                 return true;
-//                return sp.edit().putStringSet(SP_NOTE_CATEGORY, savedCategories).commit();
             }
         }
 
@@ -86,7 +76,7 @@ public class SharedPreferencesHelper {
     public static Set<String> getNoteCategories()
     {
         Set<String> categories = new HashSet<>();
-//        SharedPreferences sp = context.getSharedPreferences(SHARE_PREFERENCE_NAME, Context.MODE_PRIVATE);
+
         if(sp!=null)
         {
             categories = sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<>());

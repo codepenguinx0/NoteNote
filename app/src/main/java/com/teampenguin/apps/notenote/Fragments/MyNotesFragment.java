@@ -199,10 +199,17 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
 
     @Override
     public void onNoteEntryClicked(NoteEntryM noteEntry) {
+
         Intent intent = new Intent(getActivity(), EditNoteActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(MainActivity.EXTRA_NOTE_ENTRY,noteEntry);
-        startActivity(intent);
+        if(getActivity()!=null)
+        {
+            getActivity().startActivity(intent);
+        }else
+        {
+            startActivity(intent);
+        }
     }
 }
