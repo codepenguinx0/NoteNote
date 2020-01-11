@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey;
 
 import com.teampenguin.apps.notenote.Utils.Utils;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 @Entity(tableName = "note_entries")
@@ -43,6 +44,9 @@ public class NoteEntryM implements Parcelable {
     @ColumnInfo(name = "note_mood")
     private int mood;
 
+    @ColumnInfo
+    private String photosList;
+
     @ColumnInfo(name = "is_active")
     private boolean isActive;
 
@@ -56,6 +60,7 @@ public class NoteEntryM implements Parcelable {
         content = "";
         category = DEFAULT_CATEGORY;
         mood = 0;
+        photosList = "";
         isActive = true;
     }
 
@@ -69,6 +74,7 @@ public class NoteEntryM implements Parcelable {
         content = in.readString();
         category = in.readString();
         mood = in.readInt();
+        photosList = in.readString();
         isActive = in.readByte() != 0;
     }
 
@@ -156,6 +162,14 @@ public class NoteEntryM implements Parcelable {
         this.category = category;
     }
 
+    public String getPhotosList() {
+        return photosList;
+    }
+
+    public void setPhotosList(String photosList) {
+        this.photosList = photosList;
+    }
+
     public boolean isActive() {
         return isActive;
     }
@@ -180,6 +194,7 @@ public class NoteEntryM implements Parcelable {
         parcel.writeString(content);
         parcel.writeString(category);
         parcel.writeInt(mood);
+        parcel.writeString(photosList);
         parcel.writeByte((byte) (isActive ? 1 : 0));
     }
 }

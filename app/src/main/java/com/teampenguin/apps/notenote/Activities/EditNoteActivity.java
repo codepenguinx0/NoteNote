@@ -45,6 +45,7 @@ import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
 import com.teampenguin.apps.notenote.Fragments.InsertLinkPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.PickImagePopupFragment;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
+import com.teampenguin.apps.notenote.Models.NoteEntryPhoto;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
 import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
@@ -54,6 +55,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.BindView;
@@ -96,12 +98,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     ImageView hideTitleArrowIV;
 
     private String currentPhotoPath;
+
     private int hsvWidth;
     private int llWidth;
 
     private NoteEntryViewModel noteEntryViewModel;
     private NoteEntryM currentNote = null;
     private String newChosenCategory = null;
+    private ArrayList<NoteEntryPhoto> noteEntryPhotos = new ArrayList<>();
 
     private boolean isShowingPhotos = false;
     private boolean isShowingTitle =true;
@@ -458,6 +462,31 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setHtml(currentNote.getContent());
         categoryTV.setText(currentNote.getCategory());
         //TODO set mood
+        if(!currentNote.getPhotosList().isEmpty())
+        {
+            getNoteEntryPhotos(currentNote.getPhotosList());
+        }
+    }
+
+    //TODO implement
+    private void getNoteEntryPhotos(String photosList)
+    {
+        noteEntryPhotos.clear();
+        String[] photoIds = photosList.split(",");
+
+        for (int i = 0; i < photoIds.length; i++) {
+            //get the NoteEntryPhoto from the DB by id
+            //if a NoteEntryPhoto is returned, add it to the noteEntryPhotos list
+        }
+
+        //make adapter for the photo scroller
+        //if adapter is not existing, set up adapter
+        //else submit new list to the adapter
+    }
+
+    private void setAdapterForPhotoScroller()
+    {
+
     }
 
     private void endActivity()
@@ -645,10 +674,11 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     private void insertPhotoToEditor() {
+
         savePhotoToExternalStorage();
-        resizeCurrentPhoto();
-        editor.insertImage(currentPhotoPath, "image");
-        addEncodeImageToEditor();
+//        resizeCurrentPhoto();
+//        addEncodeImageToEditor();
+
     }
 
     private void savePhotoToExternalStorage() {
@@ -849,6 +879,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             FileOutputStream fos = null;
             Date currentTime = new Date();
             String fileName = "image_" + Utils.getTimeStringForFileName(currentTime) + ".jpg";
+            Log.d(TAG, "SavePhotoToExternalStorageAsyncTask doInBackground: fileName " + fileName);
             File outputImage = new File(strings[0] + File.separator + fileName);
 
             try {
@@ -856,7 +887,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
                 Bitmap bmp = BitmapFactory.decodeFile(strings[1]);
                 fos = new FileOutputStream(outputImage);
                 bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                Log.d(TAG, "SavePhotoToExternalStorageAsyncTask doInBackground: saved!");
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -873,6 +903,12 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.d(TAG, "SavePhotoToExternalStorageAsyncTask onPostExecute: save file finished!");
         }
     }
 

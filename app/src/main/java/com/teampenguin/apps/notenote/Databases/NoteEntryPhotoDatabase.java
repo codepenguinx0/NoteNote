@@ -8,21 +8,21 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.teampenguin.apps.notenote.Daos.NoteEntryDao;
-import com.teampenguin.apps.notenote.Models.NoteEntryM;
+import com.teampenguin.apps.notenote.Daos.NoteEntryPhotoDao;
+import com.teampenguin.apps.notenote.Models.NoteEntryPhoto;
 
-@Database(entities = {NoteEntryM.class}, version = 3)
-public abstract class NoteEntryDatabase extends RoomDatabase {
+@Database(entities = {NoteEntryPhoto.class}, version = 1)
+public abstract class NoteEntryPhotoDatabase extends RoomDatabase {
 
-    private static NoteEntryDatabase instance = null;
-    public abstract NoteEntryDao noteEntryDao();
+    private static NoteEntryPhotoDatabase instance = null;
+    public abstract NoteEntryPhotoDao noteEntryPhotoDao();
 
-    public static NoteEntryDatabase getInstance(Context context)
+    public static NoteEntryPhotoDatabase getInstance(Context context)
     {
         if(instance==null)
         {
             instance = Room.databaseBuilder(context.getApplicationContext(),
-                    NoteEntryDatabase.class, "note_entry_database")
+                    NoteEntryPhotoDatabase.class, "note_entry_photo_database")
                     .fallbackToDestructiveMigration()
                     .build();
         }
