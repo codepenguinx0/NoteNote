@@ -1,6 +1,7 @@
 package com.teampenguin.apps.notenote.Activities;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,8 +22,9 @@ import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,7 +55,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -72,6 +73,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     private static final String appDirectoryName = "NoteNote";
     private static final int POPUP_DELAY_MS = 300;
+    private static final int PHOTO_BAR_ANIMATION_DURATION = 500;
+    private static final int SHOW_PHOTOS_BUTTON_WIDTH = 180;
 
     private File imageRoot;
 
@@ -85,6 +88,12 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     LinearLayout editorOptionsLL;
     @BindView(R.id.edit_note_category_tv)
     TextView categoryTV;
+    @BindView(R.id.edit_note_show_photos_rl)
+    RelativeLayout showPhotosRL;
+    @BindView(R.id.edit_note_title_hide_area_rl)
+    RelativeLayout titleAreaRL;
+    @BindView(R.id.edit_note_hide_title_iv)
+    ImageView hideTitleArrowIV;
 
     private String currentPhotoPath;
     private int hsvWidth;
@@ -93,6 +102,9 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     private NoteEntryViewModel noteEntryViewModel;
     private NoteEntryM currentNote = null;
     private String newChosenCategory = null;
+
+    private boolean isShowingPhotos = false;
+    private boolean isShowingTitle =true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,7 +129,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         checkPermissions();
         initializeEditor();
         setOnGlobalLayoutListener();
-
     }
 
     @Override
@@ -182,6 +193,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @Override
+    public void onBackPressed() {
+
+        back();
+//        super.onBackPressed();
+    }
+
     //<----------------Buttons---------------->
     //region BUTTONS
 
@@ -240,10 +258,10 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     //TODO add image
-//    @OnClick(R.id.editor_image_iv)
-//    public void insertImage() {
-//        showImagePopup();
-//    }
+    @OnClick(R.id.edit_note_show_photos_add_iv)
+    public void insertImage() {
+        showImagePopup();
+    }
 
     //CHANGE TEXT COLOUR
     @OnClick(R.id.editor_text_colour_iv)
@@ -292,13 +310,41 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
         }
 
-        onBackPressed();
+        endActivity();
     }
 
     //CATEGORY
     @OnClick(R.id.edit_note_category_rl)
     public void chooseCategory() {
         showCategoryPopup();
+    }
+
+    //SHOW PHOTOS
+    @OnClick(R.id.edit_note_show_photos_iv)
+    public void showOrHidePhotos()
+    {
+        if(isShowingPhotos)
+        {
+            isShowingPhotos = false;
+            closePhotosBar();
+        }else
+        {
+            isShowingPhotos = true;
+            openPhotoBar();
+        }
+    }
+
+    //HIDE OR SHOW TITLE AND CATEGORY AREA
+    @OnClick(R.id.edit_note_hide_title_rl)
+    public void showOrHideTitle()
+    {
+        if(isShowingTitle)
+        {
+            hideTitle();
+        }else
+        {
+            showTitle();
+        }
     }
     //endregion
 
@@ -313,6 +359,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setPlaceholder("Insert text here...");
         editor.setInputEnabled(true);
         editor.setBackgroundColor(getResources().getColor(R.color.transparent));
+        clearAllFocus();
     }
 
     private void clearAllFocus() {
@@ -351,6 +398,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     private void checkLayout() {
+
         if (hsvWidth > llWidth) {
             Log.d(TAG, "checkLayout: editorOptionsHSV.getWidth() > editorOptionsLL.getWidth()");
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) editorOptionsLL.getLayoutParams();
@@ -362,6 +410,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             layoutParams.gravity = Gravity.NO_GRAVITY;
             editorOptionsLL.setLayoutParams(layoutParams);
         }
+
+        closePhotosBarInitial();
     }
 
     private void setOnGlobalLayoutListener() {
@@ -407,7 +457,54 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         noteTitleET.setText(currentNote.getNoteTitle());
         editor.setHtml(currentNote.getContent());
         categoryTV.setText(currentNote.getCategory());
-        //TODO set category and mood
+        //TODO set mood
+    }
+
+    private void endActivity()
+    {
+        this.finish();
+    }
+
+    private void closePhotosBarInitial()
+    {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(showPhotosRL, "translationX", hsvWidth - hsvWidth/5f);
+        animator.setDuration(0);
+        animator.start();
+    }
+
+    private void closePhotosBar()
+    {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(showPhotosRL, "translationX", hsvWidth - hsvWidth/5f);
+        animator.setDuration(PHOTO_BAR_ANIMATION_DURATION);
+        animator.start();
+    }
+
+    private void openPhotoBar()
+    {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(showPhotosRL, "translationX", 0);
+        animator.setDuration(PHOTO_BAR_ANIMATION_DURATION);
+        animator.start();
+    }
+
+    private void hideTitle()
+    {
+        isShowingTitle = false;
+        titleAreaRL.setVisibility(View.GONE);
+        hideTitleArrowIV.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_drop_down));
+
+        if(noteTitleET.hasFocus())
+        {
+            Utils.hideSoftKeyboard(this);
+            noteTitleET.clearFocus();
+        }
+
+    }
+
+    private void showTitle()
+    {
+        isShowingTitle = true;
+        titleAreaRL.setVisibility(View.VISIBLE);
+        hideTitleArrowIV.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_drop_up));
     }
 
     private void createPhotoFolder() {
@@ -648,14 +745,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        onBackPressed();
+                        endActivity();
                     }
                 })
                 .setNeutralButton("Save and Quit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         saveNote();
-                        onBackPressed();
+                        endActivity();
                     }
                 })
                 .setNegativeButton("Cancel", null)
