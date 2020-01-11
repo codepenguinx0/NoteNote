@@ -733,6 +733,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         newChosenCategory = category;
         categoryTV.setText(category);
     }
+
+    @Override
+    public void onCategoryRemovedFromList(String category) {
+
+        Log.d(TAG, "onCategoryRemovedFromList: ");
+        noteEntryViewModel.resetNotesCategory(category);
+        newChosenCategory = NoteEntryM.DEFAULT_CATEGORY;
+    }
     //endregion
 
     //region INNER CLASSES

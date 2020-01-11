@@ -46,4 +46,9 @@ public class NoteEntryViewModel extends AndroidViewModel {
     {
         return repository.getAllNoteEntries();
     }
+
+    public void resetNotesCategory(String category)
+    {
+        repository.resetNotesCategory(category);
+    }
 }

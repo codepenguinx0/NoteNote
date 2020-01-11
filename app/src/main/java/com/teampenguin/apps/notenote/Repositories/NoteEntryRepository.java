@@ -140,6 +140,8 @@ public class NoteEntryRepository {
 
         @Override
         protected Void doInBackground(String... strings) {
+
+            noteEntryDao.resetNotesCategory(strings[0]);
             return null;
         }
     }

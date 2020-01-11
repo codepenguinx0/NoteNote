@@ -2,6 +2,7 @@ package com.teampenguin.apps.notenote.Fragments;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.teampenguin.apps.notenote.Adapters.CategoryListAdapter;
+import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.SharedPreferencesHelper;
 import com.teampenguin.apps.notenote.Utils.Utils;
@@ -104,7 +106,6 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
     @OnClick(R.id.category_popup_close_iv)
     public void close()
     {
-        //TODO if chosenCategory is not null, update the chosenCategory of the note
         if(chosenCategory!=null)
         {
             if(callBackListener!=null)
@@ -121,7 +122,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
 
     private void setAdapter()
     {
-        adapter = new CategoryListAdapter(chosenCategory);
+        adapter = new CategoryListAdapter();
         adapter.setCallBackListener(this);
         getListForAdapter();
         categoriesRV.setAdapter(adapter);
@@ -136,14 +137,17 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
         {
             categories.add(category);
         }
+        adapter.updateChosenCategory(chosenCategory);
         adapter.submitList(categories);
+//        categoriesRV.scrollToPosition(adapter.getChosenPostion());
     }
 
     private void showDeleteCategoryAlert(final String category)
     {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle("Delete Category")
-                .setMessage("Are you sure to delete this category?\n It will affect notes that are tagged under this category")
+                .setIcon(getResources().getDrawable(R.drawable.ic_warning))
+                .setMessage(Html.fromHtml("Are you sure to delete this category?" + "<br><b>" + "It will affect notes that are tagged under this category!" + "</b></br>"))
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -161,6 +165,11 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
         if(SharedPreferencesHelper.deleteNoteCategory(category))
         {
             getListForAdapter();
+            chosenCategory = NoteEntryM.DEFAULT_CATEGORY;
+            if(callBackListener!=null)
+            {
+                callBackListener.onCategoryRemovedFromList(category);
+            }
             //reset the category of notes of the deleted category
             Toast.makeText(getActivity(), "Removed " + category, Toast.LENGTH_SHORT).show();
         }else
@@ -183,5 +192,6 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
 
     public interface CategoryPopupCallBack {
         void onCategoryChosen(String category);
+        void onCategoryRemovedFromList(String category);
     }
 }

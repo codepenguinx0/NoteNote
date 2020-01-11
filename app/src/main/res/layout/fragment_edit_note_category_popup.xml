@@ -9,16 +9,18 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/category_popup_banner_cv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="80dp"
         android:layout_marginEnd="16dp"
         app:cardBackgroundColor="@color/main_light_yellow"
         app:cardCornerRadius="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="20dp"
             android:paddingTop="20dp"
@@ -33,41 +35,50 @@
                 android:textSize="30dp"
                 android:textStyle="bold" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/category_popup_categories_rv"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="24dp" />
-
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
+                android:layout_height="match_parent">
 
-                <EditText
-                    android:id="@+id/category_popup_new_category_et"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/category_popup_categories_rv"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_toStartOf="@+id/add_new_category_button"
-                    android:background="@drawable/half_transparent_white_rounded_bg"
-                    android:hint="New Category"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp" />
+                    android:layout_height="match_parent"
+                    android:layout_above="@+id/category_popup_new_category_rl"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="24dp" />
 
-                <Button
-                    android:id="@+id/add_new_category_button"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginStart="16dp"
-                    android:background="@drawable/green_button_bg"
-                    android:text="+"
-                    android:textColor="@android:color/white"
-                    android:textSize="30sp" />
+                <RelativeLayout
+                    android:id="@+id/category_popup_new_category_rl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginTop="16dp">
+
+                    <EditText
+                        android:id="@+id/category_popup_new_category_et"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@+id/add_new_category_button"
+                        android:background="@drawable/half_transparent_white_rounded_bg"
+                        android:hint="New Category"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp" />
+
+                    <Button
+                        android:id="@+id/add_new_category_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/green_button_bg"
+                        android:text="+"
+                        android:textColor="@android:color/white"
+                        android:textSize="30sp" />
+                </RelativeLayout>
+
             </RelativeLayout>
 
 
@@ -78,9 +89,9 @@
         android:id="@+id/category_popup_close_iv"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_below="@+id/category_popup_banner_cv"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
+        android:layout_marginBottom="20dp"
         android:src="@drawable/ic_cancel" />
 
 </RelativeLayout>

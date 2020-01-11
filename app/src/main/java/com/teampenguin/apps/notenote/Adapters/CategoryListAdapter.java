@@ -25,7 +25,8 @@ public class CategoryListAdapter extends ListAdapter<String, CategoryListAdapter
 
     private static final String TAG = "CategoryListAdapter";
     private static final int PRESET_CATEGORY_NUMBER = 6;
-    private String chosenCategory;
+    private String chosenCategory = null;
+    private int chosenPosition;
 
     private ArrayList<CardView> cardViews;
 
@@ -43,15 +44,25 @@ public class CategoryListAdapter extends ListAdapter<String, CategoryListAdapter
 
     private CategoryAdapterCallBack callBackListener = null;
 
-    public CategoryListAdapter(String chosenCategory) {
+    public CategoryListAdapter() {
         super(DIFF_CALLBACK);
-        this.chosenCategory = chosenCategory;
+//        this.chosenCategory = chosenCategory;
         cardViews = new ArrayList<>();
     }
 
     public void setCallBackListener(CategoryAdapterCallBack listener)
     {
         this.callBackListener = listener;
+    }
+
+    public void updateChosenCategory(String chosenCategory)
+    {
+        this.chosenCategory = chosenCategory;
+
+        if(cardViews.size() > 0)
+        {
+            updateCardViewsColours(cardViews.get(0));
+        }
     }
 
     @NonNull
@@ -105,13 +116,23 @@ public class CategoryListAdapter extends ListAdapter<String, CategoryListAdapter
 
     private boolean isChosenCategory(int pos)
     {
-        int posOfChosenCategory = getCurrentList().indexOf(chosenCategory);
-        if(posOfChosenCategory!=-1 && posOfChosenCategory == pos)
+        if(chosenCategory!=null)
         {
-            return true;
+            int posOfChosenCategory = getCurrentList().indexOf(chosenCategory);
+
+            if(posOfChosenCategory!=-1 && posOfChosenCategory == pos)
+            {
+                chosenPosition = pos;
+                return true;
+            }
         }
 
         return false;
+    }
+
+    public int getChosenPostion()
+    {
+        return chosenPosition;
     }
 
     public class CategoryAdapterViewHold extends RecyclerView.ViewHolder{
