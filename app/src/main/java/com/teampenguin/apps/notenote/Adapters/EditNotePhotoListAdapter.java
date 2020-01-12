@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
 import com.teampenguin.apps.notenote.Models.NoteEntryPhoto;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
@@ -26,6 +27,8 @@ public class EditNotePhotoListAdapter extends ListAdapter<NoteEntryPhoto, EditNo
 
     private Context context;
     private HashMap<Integer, Bitmap> photoMap;
+
+    private PhotoListAdapterCallBack callBackListener = null;
 
     private static final DiffUtil.ItemCallback<NoteEntryPhoto> DIFF_CALLBACK = new DiffUtil.ItemCallback<NoteEntryPhoto>() {
         @Override
@@ -42,6 +45,11 @@ public class EditNotePhotoListAdapter extends ListAdapter<NoteEntryPhoto, EditNo
     public EditNotePhotoListAdapter() {
         super(DIFF_CALLBACK);
         photoMap = new HashMap<>();
+    }
+
+    public void setCallBackListener(PhotoListAdapterCallBack callBackListener)
+    {
+        this.callBackListener = callBackListener;
     }
 
     @NonNull
@@ -93,6 +101,25 @@ public class EditNotePhotoListAdapter extends ListAdapter<NoteEntryPhoto, EditNo
         public PhotoListAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final int pos = getAdapterPosition();
+
+                    if(callBackListener!=null)
+                    {
+                        callBackListener.onPhotoChosen(getItem(pos));
+                    }
+
+                }
+            });
         }
+    }
+
+    public interface PhotoListAdapterCallBack {
+
+        void onPhotoChosen(NoteEntryPhoto photo);
+
     }
 }

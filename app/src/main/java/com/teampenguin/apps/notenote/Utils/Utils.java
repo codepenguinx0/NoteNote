@@ -5,12 +5,16 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+
+import com.teampenguin.apps.notenote.Activities.EditNoteActivity;
+import com.teampenguin.apps.notenote.R;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
@@ -21,6 +25,14 @@ import jp.wasabeef.richeditor.RichEditor;
 public class Utils {
 
     private static final String TAG = "Utils";
+
+    private static Context mContext;
+
+    public static void init(Context context)
+    {
+        mContext = context;
+    }
+
     public static String convertDateToString(Date date){
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy hh:mm a");
@@ -126,6 +138,37 @@ public class Utils {
         return bmp;
     }
 
+    public static Drawable getMoodIcon(int mood)
+    {
+        if(mContext!=null)
+        {
+            switch (mood)
+            {
+                case EditNoteActivity
+                        .MOOD_HAPPY:
+                    return mContext.getResources().getDrawable(R.drawable.mood_happy);
+                case EditNoteActivity
+                        .MOOD_GRATEFUL:
+                    return mContext.getResources().getDrawable(R.drawable.mood_grateful);
+                case EditNoteActivity
+                        .MOOD_CONTENT:
+                    return mContext.getResources().getDrawable(R.drawable.mood_content);
+                case EditNoteActivity
+                        .MOOD_SAD:
+                    return mContext.getResources().getDrawable(R.drawable.mood_sad);
+                case EditNoteActivity
+                        .MOOD_SHOCKED:
+                    return mContext.getResources().getDrawable(R.drawable.mood_shocked);
+                case EditNoteActivity
+                        .MOOD_ANGRY:
+                    return mContext.getResources().getDrawable(R.drawable.mood_angry);
+                default:
+                    return mContext.getResources().getDrawable(R.drawable.mood_happy);
+            }
+        }
+
+        return null;
+    }
 
 }
 

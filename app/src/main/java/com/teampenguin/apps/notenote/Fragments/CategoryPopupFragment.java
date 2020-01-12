@@ -186,7 +186,7 @@ public class CategoryPopupFragment extends Fragment implements CategoryListAdapt
 
     @Override
     public void onCategoryChosen(String category) {
-        Toast.makeText(getActivity(), "chosen " + category, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), "chosen " + category, Toast.LENGTH_SHORT).show();
         chosenCategory = category;
     }
 

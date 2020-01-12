@@ -4,7 +4,9 @@ import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,8 +15,11 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chauthai.swipereveallayout.SwipeRevealLayout;
+import com.chauthai.swipereveallayout.ViewBinderHelper;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.R;
+import com.teampenguin.apps.notenote.Utils.Utils;
 
 import java.util.List;
 
@@ -24,6 +29,7 @@ import butterknife.ButterKnife;
 public class NoteEntriesAdapter extends ListAdapter<NoteEntryM, NoteEntriesAdapter.NoteEntriesViewHolder> {
 
     private NoteEntriesAdapterCallBack mListener = null;
+    private ViewBinderHelper viewBinderHelper;
 
     //must be a static function so that it is available before the constructor is being called
     public static final DiffUtil.ItemCallback<NoteEntryM> DIFF_CALLBACK = new DiffUtil.ItemCallback<NoteEntryM>() {
@@ -34,15 +40,17 @@ public class NoteEntriesAdapter extends ListAdapter<NoteEntryM, NoteEntriesAdapt
 
         @Override
         public boolean areContentsTheSame(@NonNull NoteEntryM oldItem, @NonNull NoteEntryM newItem) {
-            return oldItem.getCategory() == newItem.getCategory() &&
+            return oldItem.getCategory().equals(newItem.getCategory()) &&
                     oldItem.getNoteTitle().equals(newItem.getNoteTitle()) &&
-                    oldItem.getModifiedDate().equals(newItem.getModifiedDate());
+                    oldItem.getMood() == newItem.getMood();
         }
     };
 
     //no need to store the list of item in this class because the superclass will take care of it
     public NoteEntriesAdapter() {
         super(DIFF_CALLBACK);
+        viewBinderHelper = new ViewBinderHelper();
+        viewBinderHelper.setOpenOnlyOne(true);
     }
 
     public void setCallBackListener(NoteEntriesAdapterCallBack listener)
@@ -64,12 +72,7 @@ public class NoteEntriesAdapter extends ListAdapter<NoteEntryM, NoteEntriesAdapt
         holder.titleTV.setText(noteEntry.getNoteTitle().isEmpty()?"No Title":noteEntry.getNoteTitle());
         holder.createDateTV.setText(noteEntry.getModifiedDate());
         holder.categoryTV.setText(String.valueOf(noteEntry.getCategory()));
-        //TODO change mood icon
-    }
-
-    public NoteEntryM getNoteEntry(int position)
-    {
-        return getItem(position);
+        holder.moodIV.setImageDrawable(Utils.getMoodIcon(noteEntry.getMood()));
     }
 
     public class NoteEntriesViewHolder extends RecyclerView.ViewHolder{
@@ -82,26 +85,51 @@ public class NoteEntriesAdapter extends ListAdapter<NoteEntryM, NoteEntriesAdapt
         public TextView categoryTV;
         @BindView(R.id.note_entry_mood_iv)
         public ImageView moodIV;
+        @BindView(R.id.adapter_note_entry_frame)
+        public FrameLayout frame;
+        @BindView(R.id.adapter_note_entry_delete_rl)
+        RelativeLayout deleteRL;
+        @BindView(R.id.swipe_reveal_layout)
+        SwipeRevealLayout srl;
 
         public NoteEntriesViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-            itemView.setOnClickListener(new View.OnClickListener() {
+
+            frame.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     if (mListener!=null)
                     {
                         final int pos = getAdapterPosition();
-                        mListener.onNoteEntryClicked(getNoteEntry(pos));
+                        if(srl.isOpened())
+                        {
+                            srl.close(false);
+                        }
+                        mListener.onNoteEntryClicked(getItem(pos));
                     }
                 }
             });
+
+            deleteRL.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(mListener!=null)
+                    {
+                        final int pos = getAdapterPosition();
+                        mListener.onDeleteClicked(getItem(pos));
+                    }
+                }
+            });
+
+
         }
     }
 
     public interface NoteEntriesAdapterCallBack{
 
         void onNoteEntryClicked(NoteEntryM noteEntry);
+        void onDeleteClicked(NoteEntryM noteEntryM);
     }
 }

@@ -2,8 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/sorting_popup_menu_create_date"
+        android:id="@+id/sorting_popup_menu_create_date_lto"
         android:title="Latest to Oldest (Default)" />
+
+    <item
+        android:id="@+id/sorting_popup_menu_create_date_otl"
+        android:title="Oldest to Latest" />
+
     <item
         android:id="@+id/sorting_popup_menu_title_a_z"
         android:title="Title (A to Z)" />

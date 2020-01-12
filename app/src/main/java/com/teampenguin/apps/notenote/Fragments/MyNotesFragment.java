@@ -1,5 +1,6 @@
 package com.teampenguin.apps.notenote.Fragments;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,11 +9,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -46,9 +50,12 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
     RecyclerView myNotesRV;
     @BindView(R.id.my_notes_sort_iv)
     ImageView sortIV;
+    @BindView(R.id.my_notes_no_results_rl)
+    RelativeLayout noResultsRL;
 
     private NoteEntriesAdapter adapter;
     private NoteEntryViewModel noteEntryViewModel;
+    private ArrayList<NoteEntryM> originalList = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,9 +108,13 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
 
         switch (item.getItemId())
         {
-            case R.id.sorting_popup_menu_create_date:
-                Log.d(TAG, "onMenuItemClick: create date");
+            case R.id.sorting_popup_menu_create_date_lto:
+                Log.d(TAG, "onMenuItemClick: create date lto");
                 sortByCreateDateLToO();
+                return true;
+            case R.id.sorting_popup_menu_create_date_otl:
+                Log.d(TAG, "onMenuItemClick: otl ");
+                sortByCreateDateOToL();
                 return true;
             case R.id.sorting_popup_menu_title_a_z:
                 Log.d(TAG, "onMenuItemClick: title a to z");
@@ -114,9 +125,11 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
                 sortByTitleZToA();
                 return true;
             case R.id.sorting_popup_menu_category:
+                sortByCategory();
                 Log.d(TAG, "onMenuItemClick: category");
                 return true;
             case R.id.sorting_popup_menu_mood:
+                sortByMood();
                 Log.d(TAG, "onMenuItemClick: mood");
                 return true;
             default:
@@ -146,9 +159,10 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         Collections.sort(sortedList, new Comparator<NoteEntryM>() {
             @Override
             public int compare(NoteEntryM o1, NoteEntryM o2) {
-                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
-                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
-                return d1.compareTo(d2);
+//                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
+//                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
+//                return d2.compareTo(d1);
+                return o2.getId() - o1.getId();
             }
         });
 
@@ -161,9 +175,10 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         Collections.sort(sortedList, new Comparator<NoteEntryM>() {
             @Override
             public int compare(NoteEntryM o1, NoteEntryM o2) {
-                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
-                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
-                return d2.compareTo(d1);
+//                Date d1 = Utils.convertDateStringToDate(o1.getCreateDate());
+//                Date d2 = Utils.convertDateStringToDate(o2.getCreateDate());
+//                return d1.compareTo(d2);
+                return o1.getId() - o2.getId();
             }
         });
 
@@ -196,6 +211,91 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         adapter.submitList(sortedList);
     }
 
+    private void sortByCategory()
+    {
+        ArrayList<NoteEntryM> sortedList = new ArrayList<>(adapter.getCurrentList());
+        Collections.sort(sortedList, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                return o1.getCategory().compareTo(o2.getCategory());
+            }
+        });
+
+        adapter.submitList(sortedList);
+    }
+
+    private void sortByMood()
+    {
+        ArrayList<NoteEntryM> sortedList = new ArrayList<>(adapter.getCurrentList());
+        Collections.sort(sortedList, new Comparator<NoteEntryM>() {
+            @Override
+            public int compare(NoteEntryM o1, NoteEntryM o2) {
+                return o1.getMood() - o2.getMood();
+            }
+        });
+
+        adapter.submitList(sortedList);
+    }
+
+    private void showDeleteNoteEntryAlert(final NoteEntryM noteEntry)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Delete Note Entry")
+                .setMessage("Are you sure to delete this note entry?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteNoteEntry(noteEntry);
+                    }
+                })
+                .setNegativeButton("Cancel",null)
+                .create();
+
+        alertDialog.show();
+    }
+
+    private void deleteNoteEntry(NoteEntryM noteEntryM)
+    {
+        noteEntryViewModel.delete(noteEntryM);
+    }
+
+    public void searchNotes(String keyword)
+    {
+        if(originalList == null)
+        {
+            originalList = new ArrayList<>(adapter.getCurrentList());
+        }
+
+        ArrayList<NoteEntryM> searchList = new ArrayList<>();
+
+        for (int i = 0; i < originalList.size(); i++) {
+            if(originalList.get(i).getNoteTitle().toLowerCase().contains(keyword) || originalList.get(i).getCategory().toLowerCase().contains(keyword))
+            {
+                searchList.add(originalList.get(i));
+            }
+        }
+
+        adapter.submitList(searchList);
+
+        if(searchList.size() == 0)
+        {
+            //show no results found
+            noResultsRL.setVisibility(View.VISIBLE);
+        }else
+        {
+            //hide no results found
+            noResultsRL.setVisibility(View.GONE);
+        }
+    }
+
+    public void clearSearchResult()
+    {
+        adapter.submitList(originalList);
+        originalList = null;
+        noResultsRL.setVisibility(View.GONE);
+        //hide no results found
+    }
+
 
     @Override
     public void onNoteEntryClicked(NoteEntryM noteEntry) {
@@ -211,5 +311,11 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
         {
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onDeleteClicked(NoteEntryM noteEntry) {
+
+        showDeleteNoteEntryAlert(noteEntry);
     }
 }

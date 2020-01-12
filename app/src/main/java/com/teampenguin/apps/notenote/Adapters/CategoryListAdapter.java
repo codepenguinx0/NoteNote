@@ -146,7 +146,7 @@ public class CategoryListAdapter extends ListAdapter<String, CategoryListAdapter
             super(itemView);
             ButterKnife.bind(this,itemView);
 
-            CardView cardView = (CardView) itemView;
+            final CardView cardView = (CardView) itemView;
 
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override

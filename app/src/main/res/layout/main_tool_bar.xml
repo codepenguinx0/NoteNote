@@ -63,6 +63,7 @@
                     android:layout_toEndOf="@+id/tool_bar_search_iv"
                     android:background="@android:color/transparent"
                     android:hint="search for a note"
+                    android:inputType="text"
                     android:maxLines="1"
                     android:textColor="@android:color/black" />
             </RelativeLayout>

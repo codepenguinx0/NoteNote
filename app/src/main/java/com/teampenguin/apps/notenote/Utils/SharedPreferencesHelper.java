@@ -31,7 +31,7 @@ public class SharedPreferencesHelper {
         {
             SharedPreferences.Editor editor = sp.edit();
 
-            Set<String> savedCategories = sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<>());
+            HashSet<String> savedCategories = (HashSet<String>) sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<String>());
             Set<String> temp = new HashSet<>(savedCategories);
 
             Log.d(TAG, "addNewNoteCategory: savedCategories.size()" + savedCategories.size());
@@ -58,7 +58,7 @@ public class SharedPreferencesHelper {
         {
             SharedPreferences.Editor editor = sp.edit();
 
-            Set<String> savedCategories = sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<>());
+            HashSet<String> savedCategories = (HashSet<String>) sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<String>());
             Set<String> temp = new HashSet<>(savedCategories);
 
             if(temp.remove(category))
@@ -79,7 +79,7 @@ public class SharedPreferencesHelper {
 
         if(sp!=null)
         {
-            categories = sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<>());
+            categories = sp.getStringSet(SP_NOTE_CATEGORY, new HashSet<String>());
             Log.d(TAG, "getNoteCategories: categories.size() " + categories.size());
         }
 

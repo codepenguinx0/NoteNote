@@ -25,9 +25,18 @@ public class NoteEntryPhotoRepository {
         dao = noteEntryPhotoDatabase.noteEntryPhotoDao();
     }
 
-    public void insert(NoteEntryPhoto noteEntryPhoto)
+    public long insert(NoteEntryPhoto noteEntryPhoto)
     {
-        new InsertNoteEntryPhotoAsyncTask(dao).execute(noteEntryPhoto);
+        InsertNoteEntryPhotoAsyncTask task = new InsertNoteEntryPhotoAsyncTask(dao);
+        long id = -1;
+        try {
+            id = task.execute(noteEntryPhoto).get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return id;
     }
 
     public void update(NoteEntryPhoto noteEntryPhoto)
@@ -40,9 +49,9 @@ public class NoteEntryPhotoRepository {
         new DeleteNoteEntryPhotoAsyncTask(dao).execute(noteEntryPhoto);
     }
 
-    public List<NoteEntryPhoto> getNoteEntryPhotosByOwnerNoteId(int ownerNoteId)
+    public List<NoteEntryPhoto> getNoteEntryPhotosByOwnerNoteId(int ownerNoteId, PhotoRepoResultsCallBack listener)
     {
-        GetNoteEntryPhotosByOwnerNoteIdAsyncTask task = new GetNoteEntryPhotosByOwnerNoteIdAsyncTask(dao);
+        GetNoteEntryPhotosByOwnerNoteIdAsyncTask task = new GetNoteEntryPhotosByOwnerNoteIdAsyncTask(dao, listener);
         List<NoteEntryPhoto> list;
 
         try {
@@ -61,7 +70,23 @@ public class NoteEntryPhotoRepository {
         return new ArrayList<>();
     }
 
-    private static class InsertNoteEntryPhotoAsyncTask extends AsyncTask<NoteEntryPhoto, Void, Void> {
+    public List<NoteEntryPhoto> getAllPhotos()
+    {
+        GetAllPhotosAsyncTask task = new GetAllPhotosAsyncTask(dao);
+        List<NoteEntryPhoto> list = new ArrayList<>();
+
+        try {
+            list = task.execute().get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    private static class InsertNoteEntryPhotoAsyncTask extends AsyncTask<NoteEntryPhoto, Void, Long> {
 
         private NoteEntryPhotoDao dao;
 
@@ -71,11 +96,16 @@ public class NoteEntryPhotoRepository {
         }
 
         @Override
-        protected Void doInBackground(NoteEntryPhoto... noteEntryPhotos) {
+        protected Long doInBackground(NoteEntryPhoto... noteEntryPhotos) {
 
-            dao.insert(noteEntryPhotos[0]);
-            Log.d(TAG, "InsertNoteEntryPhotoAsyncTask: finished!");
-            return null;
+            long id = dao.insert(noteEntryPhotos[0]);
+            return id;
+        }
+
+        @Override
+        protected void onPostExecute(Long aLong) {
+            super.onPostExecute(aLong);
+            Log.d(TAG, "onPostExecute: finished inserting new id " + aLong);
         }
     }
 
@@ -116,10 +146,12 @@ public class NoteEntryPhotoRepository {
     private static class GetNoteEntryPhotosByOwnerNoteIdAsyncTask extends AsyncTask<Integer, Void, List<NoteEntryPhoto>>
     {
         private NoteEntryPhotoDao dao;
+        private PhotoRepoResultsCallBack listener;
 
-        public GetNoteEntryPhotosByOwnerNoteIdAsyncTask(NoteEntryPhotoDao dao)
+        public GetNoteEntryPhotosByOwnerNoteIdAsyncTask(NoteEntryPhotoDao dao, PhotoRepoResultsCallBack listener)
         {
             this.dao = dao;
+            this.listener = listener;
         }
 
         @Override
@@ -129,6 +161,43 @@ public class NoteEntryPhotoRepository {
             return list;
         }
 
+        @Override
+        protected void onPostExecute(List<NoteEntryPhoto> noteEntryPhotos) {
+
+            super.onPostExecute(noteEntryPhotos);
+
+            if(listener!=null)
+            {
+                listener.returnListOfPhotos(noteEntryPhotos);
+            }
+        }
+    }
+
+    private static class GetAllPhotosAsyncTask extends AsyncTask<Void, Void, List<NoteEntryPhoto>>
+    {
+        private NoteEntryPhotoDao dao;
+
+        public GetAllPhotosAsyncTask(NoteEntryPhotoDao dao)
+        {
+            this.dao = dao;
+        }
+
+        @Override
+        protected List<NoteEntryPhoto> doInBackground(Void... voids) {
+
+            List<NoteEntryPhoto> list = dao.getAllPhotos();
+            return list;
+        }
+
+        @Override
+        protected void onPostExecute(List<NoteEntryPhoto> noteEntryPhotos) {
+            super.onPostExecute(noteEntryPhotos);
+            Log.d(TAG, "onPostExecute: noteEntryPhotos.size()" + noteEntryPhotos.size());
+        }
+    }
+
+    public interface PhotoRepoResultsCallBack {
+        void returnListOfPhotos(List<NoteEntryPhoto> photos);
     }
 
 }

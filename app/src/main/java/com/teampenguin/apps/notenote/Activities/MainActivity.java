@@ -13,6 +13,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -67,6 +69,8 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
 
 //    private NoteEntryViewModel noteEntryViewModel;
 
+    private MyNotesFragment myNotesFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,13 +102,37 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
                 }
             }
         });
+
+        searchBarET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(Utils.isEditTextEmpty(searchBarET))
+                {
+                    myNotesFragment.clearSearchResult();
+                }else
+                {
+                    myNotesFragment.searchNotes(s.toString().toLowerCase());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     private void setViewPagerAdapter() {
         MainViewPagerAdapter adapter = new MainViewPagerAdapter(getSupportFragmentManager());
 
         TodoListFragment todoListFragment = new TodoListFragment();
-        MyNotesFragment myNotesFragment = new MyNotesFragment();
+        myNotesFragment = new MyNotesFragment();
         adapter.addFragment(todoListFragment);
         adapter.addFragment(myNotesFragment);
 

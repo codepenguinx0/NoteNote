@@ -43,13 +43,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.teampenguin.apps.notenote.Adapters.EditNotePhotoListAdapter;
 import com.teampenguin.apps.notenote.Fragments.CategoryPopupFragment;
+import com.teampenguin.apps.notenote.Fragments.ChooseMoodFragment;
 import com.teampenguin.apps.notenote.Fragments.ChooseTextColourPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
 import com.teampenguin.apps.notenote.Fragments.InsertLinkPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.PickImagePopupFragment;
+import com.teampenguin.apps.notenote.Fragments.ViewPhotoFragment;
 import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.Models.NoteEntryPhoto;
 import com.teampenguin.apps.notenote.R;
+import com.teampenguin.apps.notenote.Repositories.NoteEntryPhotoRepository;
 import com.teampenguin.apps.notenote.Utils.Utils;
 import com.teampenguin.apps.notenote.ViewModels.NoteEntryPhotoViewModel;
 import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
@@ -68,7 +71,9 @@ import butterknife.OnClick;
 import jp.wasabeef.richeditor.RichEditor;
 
 public class EditNoteActivity extends AppCompatActivity implements PickImagePopupFragment.PickImagePopupCallBack, CommonFragmentInterface,
-        InsertLinkPopupFragment.InsertLinkPopupCallBack, ChooseTextColourPopupFragment.ChooseTextColourPopupCallBack, CategoryPopupFragment.CategoryPopupCallBack {
+        InsertLinkPopupFragment.InsertLinkPopupCallBack, ChooseTextColourPopupFragment.ChooseTextColourPopupCallBack, CategoryPopupFragment.CategoryPopupCallBack,
+        NoteEntryPhotoRepository.PhotoRepoResultsCallBack, EditNotePhotoListAdapter.PhotoListAdapterCallBack, ViewPhotoFragment.ViewPhotoFragmentCallBack,
+        ChooseMoodFragment.ChooseMoodFragmentCallBack {
 
     public static final String TAG = "EditNoteActivity";
 
@@ -78,9 +83,15 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     public static final int REQUEST_CODE_PICK_IMAGE = 202;
 
     private static final String appDirectoryName = "NoteNote";
-    private static final int POPUP_DELAY_MS = 300;
-    private static final int PHOTO_BAR_ANIMATION_DURATION = 500;
-    private static final int SHOW_PHOTOS_BUTTON_WIDTH = 180;
+    public static final int POPUP_DELAY_MS = 300;
+    public static final int PHOTO_BAR_ANIMATION_DURATION = 500;
+
+    public static final int MOOD_HAPPY = 0;
+    public static final int MOOD_GRATEFUL = 1;
+    public static final int MOOD_CONTENT = 2;
+    public static final int MOOD_SAD = 3;
+    public static final int MOOD_SHOCKED = 4;
+    public static final int MOOD_ANGRY = 5;
 
     private File imageRoot;
 
@@ -102,6 +113,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     ImageView hideTitleArrowIV;
     @BindView(R.id.edit_note_photos_rv)
     RecyclerView photosRV;
+    @BindView(R.id.edit_note_mood_iv)
+    ImageView moodIconIV;
 
     private String currentInternalPhotoPath;
 
@@ -113,11 +126,13 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     private NoteEntryM currentNote = null;
     private String newChosenCategory = null;
     private EditNotePhotoListAdapter photoListAdapter = null;
-
+    private int currentMood = 0;
 
     private boolean isShowingPhotos = false;
     private boolean isShowingTitle =true;
 
+    //<----------------Super class methods---------------->
+    //region SUPER CLASS METHODS
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -219,6 +234,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 //        super.onBackPressed();
     }
 
+    //endregion
+
     //<----------------Buttons---------------->
     //region BUTTONS
 
@@ -276,7 +293,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setNumbers();
     }
 
-    //TODO add image
     @OnClick(R.id.edit_note_show_photos_add_iv)
     public void insertImage() {
         showImagePopup();
@@ -329,6 +345,12 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
         }
 
+        if(currentNote!=null && currentMood!=currentNote.getMood())
+        {
+            showNotSaveAlert();
+            return;
+        }
+
         endActivity();
     }
 
@@ -365,6 +387,21 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             showTitle();
         }
     }
+
+    //MOOD
+    @OnClick(R.id.edit_note_choose_mood_ll)
+    public void chooseMood()
+    {
+        showChooseMoodFragment();
+    }
+    
+    //UPLOAD
+    @OnClick(R.id.edit_note_upload_iv)
+    public void upload()
+    {
+        Toast.makeText(this, "Coming soon!", Toast.LENGTH_SHORT).show();
+    }
+
     //endregion
 
     //<----------------functions---------------->
@@ -473,11 +510,41 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     }
 
     private void mapNoteData() {
+
         noteTitleET.setText(currentNote.getNoteTitle());
         editor.setHtml(currentNote.getContent());
         categoryTV.setText(currentNote.getCategory());
-        //TODO set mood
+        currentMood = currentNote.getMood();
+        setMoodIcon();
         getPhotosForThisNote();
+
+    }
+
+    private void setMoodIcon(){
+
+        switch (currentMood)
+        {
+            case MOOD_HAPPY:
+                moodIconIV.setImageDrawable(getResources().getDrawable(R.drawable.mood_happy));
+                break;
+            case MOOD_GRATEFUL:
+                moodIconIV.setImageDrawable(getResources().getDrawable(R.drawable.mood_grateful));
+                break;
+            case MOOD_CONTENT:
+                moodIconIV.setImageDrawable(getResources().getDrawable(R.drawable.mood_content));
+                break;
+            case MOOD_SAD:
+                moodIconIV.setImageDrawable(getResources().getDrawable(R.drawable.mood_sad));
+                break;
+            case MOOD_SHOCKED:
+                moodIconIV.setImageDrawable(getResources().getDrawable(R.drawable.mood_shocked));
+                break;
+            case MOOD_ANGRY:
+                moodIconIV.setImageDrawable(getResources().getDrawable(R.drawable.mood_angry));
+                break;
+            default:
+                moodIconIV.setImageDrawable(getResources().getDrawable(R.drawable.mood_happy));
+        }
     }
 
     private void setAdapterForPhotoList(List<NoteEntryPhoto> photos)
@@ -485,6 +552,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         if(photoListAdapter==null)
         {
             photoListAdapter = new EditNotePhotoListAdapter();
+            photoListAdapter.setCallBackListener(this);
         }
 
         photoListAdapter.submitList(photos);
@@ -645,6 +713,18 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     }
 
+    private void showChooseMoodFragment()
+    {
+        //TODO
+        ChooseMoodFragment fragment = ChooseMoodFragment.getInstance(currentNote==null? 0:currentNote.getMood());
+        fragment.setCallBackListener(this);
+        getSupportFragmentManager().beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.edit_note_frame, fragment, ChooseMoodFragment.TAG)
+                .addToBackStack(ChooseMoodFragment.TAG)
+                .commit();
+    }
+
     private void delayPopup(Runnable r) {
         //delay the popup for 300ms for the keyboard to hide first
         Handler handler = new Handler();
@@ -657,6 +737,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         if (fragment != null) {
             getSupportFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
                     .remove(fragment)
                     .commit();
             getSupportFragmentManager().popBackStack();
@@ -762,14 +843,19 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         Log.d(TAG, "createNewPhotoObject: newPhoto " + newPhoto.toString());
 
-        noteEntryPhotoViewModel.insert(newPhoto);
+        long insertId = noteEntryPhotoViewModel.insert(newPhoto);
+        Log.d(TAG, "createNewPhotoObject: insertId " + insertId);
         getPhotosForThisNote();
     }
 
     private void getPhotosForThisNote()
     {
-        List<NoteEntryPhoto> listOfPhotos = noteEntryPhotoViewModel.getNoteEntryPhotosByOwnerNoteId(currentNote.getId());
-        setAdapterForPhotoList(listOfPhotos);
+        noteEntryPhotoViewModel.getNoteEntryPhotosByOwnerNoteId(currentNote.getId(), this);
+        Log.d(TAG, "getPhotosForThisNote: current note id" + currentNote.getId());
+//        Log.d(TAG, "getPhotosForThisNote: number of photos" + listOfPhotos.size());
+//        setAdapterForPhotoList(listOfPhotos);
+
+        Log.d(TAG, "getPhotosForThisNote: all photos number " + noteEntryPhotoViewModel.getAllPhotos().size());
     }
 
     private String getEditorContent() {
@@ -790,6 +876,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         newNoteEntry.setCreateDate(Utils.convertDateToString(new Date()));
         newNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
         newNoteEntry.setCategory(newChosenCategory == null ? NoteEntryM.DEFAULT_CATEGORY : newChosenCategory);
+        newNoteEntry.setMood(currentMood);
 
         long newNoteEntryId = noteEntryViewModel.insert(newNoteEntry);
 
@@ -812,7 +899,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         updatedNoteEntry.setNoteTitle(Utils.isEditTextEmpty(noteTitleET) ? "" : noteTitleET.getText().toString());
         updatedNoteEntry.setContent(getEditorContent());
         updatedNoteEntry.setCategory(newChosenCategory == null ? currentNote.getCategory() : newChosenCategory);
-//        updateNoteEntry.setMood();
+        updatedNoteEntry.setMood(currentMood);
+
         noteEntryViewModel.update(updatedNoteEntry);
         currentNote = updatedNoteEntry;
 
@@ -841,6 +929,19 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         alertDialog.show();
     }
+
+    private void openViewPhotoFragment(NoteEntryPhoto photo)
+    {
+        //TODO
+        ViewPhotoFragment fragment = new ViewPhotoFragment();
+        fragment.setNoteEntryPhoto(photo);
+        fragment.setListeners(this, this);
+        getSupportFragmentManager().beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.edit_note_frame, fragment, ViewPhotoFragment.TAG)
+                .addToBackStack(ViewPhotoFragment.TAG)
+                .commit();
+    }
     //endregion
 
     // <----------------interface methods---------------->
@@ -867,7 +968,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             Uri photoURI = FileProvider.getUriForFile(this,
                     "com.teampenguin.apps.fileprovider",
                     photoFile);
-            Log.d(TAG, "takePhoto: photoURI.getPath()" + photoURI.getPath());
+//            Log.d(TAG, "takePhoto: photoURI.getPath()" + photoURI.getPath());
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
             startActivityForResult(takePictureIntent, REQUEST_CODE_IMAGE_CAPTURE);
         }
@@ -899,7 +1000,8 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     @Override
     public void changeTextColour(String colour) {
-        Log.d(TAG, "changeTextColour: choose colour " + colour);
+
+//        Log.d(TAG, "changeTextColour: choose colour " + colour);
         editor.setTextColor(Color.parseColor(colour));
         closeFragment(ChooseTextColourPopupFragment.TAG);
         editor.requestFocus();
@@ -915,9 +1017,53 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     @Override
     public void onCategoryRemovedFromList(String category) {
 
-        Log.d(TAG, "onCategoryRemovedFromList: ");
+//        Log.d(TAG, "onCategoryRemovedFromList: ");
         noteEntryViewModel.resetNotesCategory(category);
         newChosenCategory = NoteEntryM.DEFAULT_CATEGORY;
+    }
+
+    @Override
+    public void returnListOfPhotos(final List<NoteEntryPhoto> photos) {
+
+//        Log.d(TAG, "returnListOfPhotos: photos.size() " + photos.size());
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setAdapterForPhotoList(photos);
+            }
+        });
+
+    }
+
+    @Override
+    public void onPhotoChosen(NoteEntryPhoto photo) {
+        Utils.hideSoftKeyboard(this);
+        openViewPhotoFragment(photo);
+    }
+
+    @Override
+    public void onSavePhoto(NoteEntryPhoto photo) {
+
+        closeFragment(ViewPhotoFragment.TAG);
+        noteEntryPhotoViewModel.update(photo);
+        getPhotosForThisNote();
+        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDeletePhoto(NoteEntryPhoto photo) {
+
+        closeFragment(ViewPhotoFragment.TAG);
+        noteEntryPhotoViewModel.delete(photo);
+        getPhotosForThisNote();
+        Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onChooseMoodFragmentClosed(int mood) {
+        closeFragment(ChooseMoodFragment.TAG);
+        currentMood = mood;
+        setMoodIcon();
     }
     //endregion
 

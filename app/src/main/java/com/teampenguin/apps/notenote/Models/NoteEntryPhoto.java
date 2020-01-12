@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.Arrays;
 
-@Entity(tableName = "Note_entry_photos")
+@Entity(tableName = "note_entry_photos")
 public class NoteEntryPhoto {
 
     private static final String TAG = "NoteEntryPhoto";

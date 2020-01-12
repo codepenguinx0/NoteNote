@@ -19,9 +19,9 @@ public class NoteEntryPhotoViewModel extends AndroidViewModel {
         repository = new NoteEntryPhotoRepository(application);
     }
 
-    public void insert(NoteEntryPhoto noteEntryPhoto)
+    public long insert(NoteEntryPhoto noteEntryPhoto)
     {
-        repository.insert(noteEntryPhoto);
+        return repository.insert(noteEntryPhoto);
     }
 
     public void update(NoteEntryPhoto noteEntryPhoto)
@@ -34,9 +34,14 @@ public class NoteEntryPhotoViewModel extends AndroidViewModel {
         repository.delete(noteEntryPhoto);
     }
 
-    public List<NoteEntryPhoto> getNoteEntryPhotosByOwnerNoteId(int ownerNoteId)
+    public List<NoteEntryPhoto> getNoteEntryPhotosByOwnerNoteId(int ownerNoteId, NoteEntryPhotoRepository.PhotoRepoResultsCallBack listener)
     {
-        return repository.getNoteEntryPhotosByOwnerNoteId(ownerNoteId);
+        return repository.getNoteEntryPhotosByOwnerNoteId(ownerNoteId, listener);
+    }
+
+    public List<NoteEntryPhoto> getAllPhotos()
+    {
+        return repository.getAllPhotos();
     }
 
 }

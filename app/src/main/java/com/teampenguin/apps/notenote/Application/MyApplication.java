@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import com.teampenguin.apps.notenote.Utils.SharedPreferencesHelper;
+import com.teampenguin.apps.notenote.Utils.Utils;
 
 public class MyApplication extends Application {
 
@@ -12,6 +13,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         SharedPreferencesHelper.init(this);
+        Utils.init(this);
         Log.d(TAG, "onCreate: yeah");
     }
 }
