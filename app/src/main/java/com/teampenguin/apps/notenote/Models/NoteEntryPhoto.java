@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Arrays;
+
 @Entity(tableName = "Note_entry_photos")
 public class NoteEntryPhoto {
 
@@ -18,11 +20,15 @@ public class NoteEntryPhoto {
     @ColumnInfo(name = "base_64_encoded_string")
     private String base64EncodedString;
 
+    @ColumnInfo(name = "image")
+    private byte[] image;
+
     @ColumnInfo(name = "created_date")
     private String createdDate;
 
     @ColumnInfo(name = "photo_caption")
     private String photoCaption;
+
 
 
     public NoteEntryPhoto()
@@ -57,6 +63,14 @@ public class NoteEntryPhoto {
         this.base64EncodedString = base64EncodedString;
     }
 
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
     public String getCreatedDate() {
         return createdDate;
     }
@@ -71,5 +85,17 @@ public class NoteEntryPhoto {
 
     public void setPhotoCaption(String photoCaption) {
         this.photoCaption = photoCaption;
+    }
+
+    @Override
+    public String toString() {
+        return "NoteEntryPhoto{" +
+                "id=" + id +
+                ", ownerNoteId=" + ownerNoteId +
+                ", base64EncodedString='" + base64EncodedString + '\'' +
+                ", image=" + Arrays.toString(image) +
+                ", createdDate='" + createdDate + '\'' +
+                ", photoCaption='" + photoCaption + '\'' +
+                '}';
     }
 }

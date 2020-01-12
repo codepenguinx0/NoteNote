@@ -22,9 +22,9 @@ public class NoteEntryViewModel extends AndroidViewModel {
         repository = new NoteEntryRepository(application);
     }
 
-    public void insert(NoteEntryM noteEntry)
+    public long insert(NoteEntryM noteEntry)
     {
-        repository.insert(noteEntry);
+        return repository.insert(noteEntry);
     }
 
     public void update(NoteEntryM noteEntry)
@@ -50,5 +50,10 @@ public class NoteEntryViewModel extends AndroidViewModel {
     public void resetNotesCategory(String category)
     {
         repository.resetNotesCategory(category);
+    }
+
+    public NoteEntryM getNoteEntryById(long id)
+    {
+        return repository.getNoteEntryById(id);
     }
 }

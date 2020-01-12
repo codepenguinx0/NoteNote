@@ -12,6 +12,7 @@ import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.Databases.NoteEntryDatabase;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class NoteEntryRepository {
 
@@ -26,10 +27,23 @@ public class NoteEntryRepository {
         allNoteEntries = noteEntryDao.getAllNoteEntries();
     }
 
-    public void insert(NoteEntryM noteEntry)
+    public long insert(NoteEntryM noteEntry)
     {
         Log.d(TAG, "insert: " + noteEntry.getCreateDate());
-        new InsertNoteEntryAsynTask(noteEntryDao).execute(noteEntry);
+
+        long id = -1;
+
+        InsertNoteEntryAsynTask task = new InsertNoteEntryAsynTask(noteEntryDao);
+
+        try {
+            id = task.execute(noteEntry).get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return id;
     }
 
     public void delete(NoteEntryM noteEntry)
@@ -57,7 +71,23 @@ public class NoteEntryRepository {
         return allNoteEntries;
     }
 
-    private static class InsertNoteEntryAsynTask extends AsyncTask<NoteEntryM, Void, Void>
+    public NoteEntryM getNoteEntryById(long id)
+    {
+        GetNoteEntryByIdAsyncTask task = new GetNoteEntryByIdAsyncTask(noteEntryDao);
+        NoteEntryM noteEntry = null;
+
+        try {
+            noteEntry = task.execute(id).get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return noteEntry;
+
+    }
+
+    private static class InsertNoteEntryAsynTask extends AsyncTask<NoteEntryM, Void, Long>
     {
 
         private NoteEntryDao noteEntryDao;
@@ -68,10 +98,10 @@ public class NoteEntryRepository {
         }
 
         @Override
-        protected Void doInBackground(NoteEntryM... noteEntries) {
+        protected Long doInBackground(NoteEntryM... noteEntries) {
 
-            noteEntryDao.insert(noteEntries[0]);
-            return null;
+            long id = noteEntryDao.insert(noteEntries[0]);
+            return id;
         }
     }
 
@@ -143,6 +173,24 @@ public class NoteEntryRepository {
 
             noteEntryDao.resetNotesCategory(strings[0]);
             return null;
+        }
+    }
+
+    private static class GetNoteEntryByIdAsyncTask extends AsyncTask<Long, Void, NoteEntryM>
+    {
+
+        private NoteEntryDao dao;
+
+        public GetNoteEntryByIdAsyncTask(NoteEntryDao dao)
+        {
+            this.dao = dao;
+        }
+
+        @Override
+        protected NoteEntryM doInBackground(Long... longs) {
+
+            NoteEntryM noteEntry = dao.getNoteEntryById(longs[0]);
+            return noteEntry;
         }
     }
 }

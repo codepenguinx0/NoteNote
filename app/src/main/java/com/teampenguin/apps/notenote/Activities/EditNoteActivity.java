@@ -38,7 +38,10 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.teampenguin.apps.notenote.Adapters.EditNotePhotoListAdapter;
 import com.teampenguin.apps.notenote.Fragments.CategoryPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.ChooseTextColourPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
@@ -48,6 +51,7 @@ import com.teampenguin.apps.notenote.Models.NoteEntryM;
 import com.teampenguin.apps.notenote.Models.NoteEntryPhoto;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
+import com.teampenguin.apps.notenote.ViewModels.NoteEntryPhotoViewModel;
 import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
 
 import java.io.ByteArrayOutputStream;
@@ -55,8 +59,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -96,16 +100,20 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
     RelativeLayout titleAreaRL;
     @BindView(R.id.edit_note_hide_title_iv)
     ImageView hideTitleArrowIV;
+    @BindView(R.id.edit_note_photos_rv)
+    RecyclerView photosRV;
 
-    private String currentPhotoPath;
+    private String currentInternalPhotoPath;
 
     private int hsvWidth;
     private int llWidth;
 
     private NoteEntryViewModel noteEntryViewModel;
+    private NoteEntryPhotoViewModel noteEntryPhotoViewModel;
     private NoteEntryM currentNote = null;
     private String newChosenCategory = null;
-    private ArrayList<NoteEntryPhoto> noteEntryPhotos = new ArrayList<>();
+    private EditNotePhotoListAdapter photoListAdapter = null;
+
 
     private boolean isShowingPhotos = false;
     private boolean isShowingTitle =true;
@@ -117,6 +125,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
         ButterKnife.bind(this);
         noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
+        noteEntryPhotoViewModel = ViewModelProviders.of(this).get(NoteEntryPhotoViewModel.class);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -153,13 +162,19 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         if (resultCode == Activity.RESULT_OK) {
 
             if (requestCode == REQUEST_CODE_IMAGE_CAPTURE) {
-                insertPhotoToEditor();
+
+                handleTakenPhoto();
+
             } else if (requestCode == REQUEST_CODE_PICK_IMAGE) {
                 if (data == null) {
                     Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
+
+                    //TODO how to convert a uri to absolute path
                     Uri uri = data.getData();
+
+                    convertUriToBitmap(uri);
 
                     Log.d(TAG, "onActivityResult: pick photo from " + uri.getPath());
                 }
@@ -462,31 +477,23 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         editor.setHtml(currentNote.getContent());
         categoryTV.setText(currentNote.getCategory());
         //TODO set mood
-        if(!currentNote.getPhotosList().isEmpty())
+        getPhotosForThisNote();
+    }
+
+    private void setAdapterForPhotoList(List<NoteEntryPhoto> photos)
+    {
+        if(photoListAdapter==null)
         {
-            getNoteEntryPhotos(currentNote.getPhotosList());
-        }
-    }
-
-    //TODO implement
-    private void getNoteEntryPhotos(String photosList)
-    {
-        noteEntryPhotos.clear();
-        String[] photoIds = photosList.split(",");
-
-        for (int i = 0; i < photoIds.length; i++) {
-            //get the NoteEntryPhoto from the DB by id
-            //if a NoteEntryPhoto is returned, add it to the noteEntryPhotos list
+            photoListAdapter = new EditNotePhotoListAdapter();
         }
 
-        //make adapter for the photo scroller
-        //if adapter is not existing, set up adapter
-        //else submit new list to the adapter
-    }
+        photoListAdapter.submitList(photos);
 
-    private void setAdapterForPhotoScroller()
-    {
-
+        if(photosRV.getAdapter()==null)
+        {
+            photosRV.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
+            photosRV.setAdapter(photoListAdapter);
+        }
     }
 
     private void endActivity()
@@ -668,60 +675,101 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        Log.d(TAG, "createPhotoFile: currentPhotoPath " + currentPhotoPath);
+        currentInternalPhotoPath = image.getAbsolutePath();
+        Log.d(TAG, "createPhotoFile: currentInternalPhotoPath " + currentInternalPhotoPath);
         return image;
     }
 
-    private void insertPhotoToEditor() {
+    private void handleTakenPhoto() {
 
         savePhotoToExternalStorage();
-//        resizeCurrentPhoto();
-//        addEncodeImageToEditor();
-
+        createNewPhotoObject();
     }
+
+    private void convertUriToBitmap(Uri uri)
+    {
+        Bitmap bmp = null;
+
+        try {
+            bmp = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if(bmp == null)
+        {
+            Toast.makeText(this, "Cannot load image", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        createNewPhotoObject(bmp);
+    }
+
 
     private void savePhotoToExternalStorage() {
 
         SavePhotoToExternalStorageAsyncTask task = new SavePhotoToExternalStorageAsyncTask();
-        task.execute(imageRoot.getAbsolutePath(), currentPhotoPath);
+        task.execute(imageRoot.getAbsolutePath(), currentInternalPhotoPath);
     }
 
-    private void resizeCurrentPhoto() {
-        Bitmap bmp = BitmapFactory.decodeFile(currentPhotoPath);
-
-        if (bmp != null) {
-            Log.d(TAG, "resizeCurrentPhoto: yo1");
-            Bitmap resizedBmp = Utils.getResizedBitmap(bmp, (int) (bmp.getWidth() * 0.1), (int) (bmp.getHeight() * 0.1));
-            try (FileOutputStream out = new FileOutputStream(currentPhotoPath)) {
-                Log.d(TAG, "resizeCurrentPhoto: yo2");
-                resizedBmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void addEncodeImageToEditor() {
-//        String encodedImageString = "<p hidden>" + Base64.encodeToString(getByteArray(), Base64.DEFAULT) + "</p>";
-//        String encodedImageString = Base64.encodeToString(getByteArray(), Base64.DEFAULT);
-//        String htmlString  = editor.getHtml() + encodedImageString;
+//    private void resizeCurrentPhoto() {
+//        Bitmap bmp = BitmapFactory.decodeFile(currentInternalPhotoPath);
 //
-//        editor.setHtml(htmlString);
-        //TODO
-        //do not include image in the editor
-        //add involved image on the side
-        //create an attachPhoto object
+//        if (bmp != null) {
+//            Log.d(TAG, "resizeCurrentPhoto: yo1");
+//            Bitmap resizedBmp = Utils.getResizedBitmap(bmp, (int) (bmp.getWidth() * 0.1), (int) (bmp.getHeight() * 0.1));
+//            try (FileOutputStream out = new FileOutputStream(currentInternalPhotoPath)) {
+//                Log.d(TAG, "resizeCurrentPhoto: yo2");
+//                resizedBmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+
+    private void createNewPhotoObject(Bitmap bmp)
+    {
+        //must save the note before a new photo object is added
+        saveNote();
+
+        NoteEntryPhoto newPhoto = new NoteEntryPhoto();
+        newPhoto.setCreatedDate(Utils.convertDateToString(new Date()));
+        newPhoto.setOwnerNoteId(currentNote==null? -1: currentNote.getId());
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        bmp.recycle();
+
+        newPhoto.setImage(byteArray);
+
+        Log.d(TAG, "createNewPhotoObject: newPhoto " + newPhoto.toString());
+
+        noteEntryPhotoViewModel.insert(newPhoto);
+        getPhotosForThisNote();
     }
 
-    private byte[] getByteArray() {
-        byte[] b;
-        Bitmap bm = BitmapFactory.decodeFile(currentPhotoPath);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
-        b = baos.toByteArray();
+    private void createNewPhotoObject() {
 
-        return b;
+        //must save the note before a new photo object is added
+        saveNote();
+
+        NoteEntryPhoto newPhoto = new NoteEntryPhoto();
+        newPhoto.setCreatedDate(Utils.convertDateToString(new Date()));
+        newPhoto.setOwnerNoteId(currentNote==null? -1: currentNote.getId());
+        newPhoto.setImage(Utils.getByteArrayFromPath(currentInternalPhotoPath));
+
+        Log.d(TAG, "createNewPhotoObject: newPhoto " + newPhoto.toString());
+
+        noteEntryPhotoViewModel.insert(newPhoto);
+        getPhotosForThisNote();
+    }
+
+    private void getPhotosForThisNote()
+    {
+        List<NoteEntryPhoto> listOfPhotos = noteEntryPhotoViewModel.getNoteEntryPhotosByOwnerNoteId(currentNote.getId());
+        setAdapterForPhotoList(listOfPhotos);
     }
 
     private String getEditorContent() {
@@ -742,11 +790,14 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         newNoteEntry.setCreateDate(Utils.convertDateToString(new Date()));
         newNoteEntry.setModifiedDate(Utils.convertDateToString(new Date()));
         newNoteEntry.setCategory(newChosenCategory == null ? NoteEntryM.DEFAULT_CATEGORY : newChosenCategory);
-        noteEntryViewModel.insert(newNoteEntry);
 
-        currentNote = newNoteEntry;
+        long newNoteEntryId = noteEntryViewModel.insert(newNoteEntry);
 
-        Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "createNewNote: new note entry id " + newNoteEntryId);
+
+        currentNote = noteEntryViewModel.getNoteEntryById(newNoteEntryId);
+
+        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
     }
 
     private void updateNote() {
@@ -765,7 +816,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         noteEntryViewModel.update(updatedNoteEntry);
         currentNote = updatedNoteEntry;
 
-        Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
     }
 
     private void showNotSaveAlert() {
@@ -800,6 +851,7 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         closeFragmentByTag(PickImagePopupFragment.TAG);
 
         File photoFile = null;
+
         try {
 
             photoFile = createPhotoFile();
@@ -835,7 +887,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     @Override
     public void closeFragment(String tag) {
-//        Utils.hideSoftKeyboard(this);
         closeFragmentByTag(tag);
     }
 
@@ -903,12 +954,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
             }
 
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Log.d(TAG, "SavePhotoToExternalStorageAsyncTask onPostExecute: save file finished!");
         }
     }
 

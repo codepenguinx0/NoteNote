@@ -74,6 +74,7 @@ public class NoteEntryPhotoRepository {
         protected Void doInBackground(NoteEntryPhoto... noteEntryPhotos) {
 
             dao.insert(noteEntryPhotos[0]);
+            Log.d(TAG, "InsertNoteEntryPhotoAsyncTask: finished!");
             return null;
         }
     }

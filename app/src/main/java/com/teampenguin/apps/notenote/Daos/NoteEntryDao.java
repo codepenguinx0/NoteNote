@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -14,8 +15,8 @@ import java.util.List;
 @Dao
 public interface NoteEntryDao {
 
-    @Insert
-    void insert(NoteEntryM noteEntryM);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    long insert(NoteEntryM noteEntryM);
 
     @Delete
     void delete(NoteEntryM noteEntryM);
@@ -31,4 +32,7 @@ public interface NoteEntryDao {
 
     @Query("UPDATE note_entries SET note_category = 'No Category' WHERE note_category = :deleteCategory")
     void resetNotesCategory(String deleteCategory);
+
+    @Query("SELECT * FROM note_entries WHERE id = :id LIMIT 1")
+    NoteEntryM getNoteEntryById(long id);
 }

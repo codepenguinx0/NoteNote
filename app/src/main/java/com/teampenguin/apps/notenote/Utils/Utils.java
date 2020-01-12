@@ -3,6 +3,7 @@ package com.teampenguin.apps.notenote.Utils;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -103,6 +105,27 @@ public class Utils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HHmmss");
         return sdf.format(date);
     }
+
+    public static byte[] getByteArrayFromPath(String photoPath) {
+
+        byte[] b;
+        Bitmap bm = BitmapFactory.decodeFile(photoPath);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
+        b = baos.toByteArray();
+
+        return b;
+    }
+
+    public static Bitmap getBitmapFromByteArray(byte[] bytes)
+    {
+        Bitmap bmp;
+
+        bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+
+        return bmp;
+    }
+
 
 }
 
