@@ -428,21 +428,18 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE);
         } else if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     PERMISSION_REQUEST_CODE_CAMERA);
         } else if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     PERMISSION_REQUEST_CODE_CAMERA);
@@ -715,7 +712,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     private void showChooseMoodFragment()
     {
-        //TODO
         ChooseMoodFragment fragment = ChooseMoodFragment.getInstance(currentNote==null? 0:currentNote.getMood());
         fragment.setCallBackListener(this);
         getSupportFragmentManager().beginTransaction()
@@ -932,7 +928,6 @@ public class EditNoteActivity extends AppCompatActivity implements PickImagePopu
 
     private void openViewPhotoFragment(NoteEntryPhoto photo)
     {
-        //TODO
         ViewPhotoFragment fragment = new ViewPhotoFragment();
         fragment.setNoteEntryPhoto(photo);
         fragment.setListeners(this, this);

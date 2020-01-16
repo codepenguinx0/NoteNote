@@ -1,26 +1,17 @@
 package com.teampenguin.apps.notenote.Activities;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,13 +21,9 @@ import com.teampenguin.apps.notenote.Adapters.MainViewPagerAdapter;
 import com.teampenguin.apps.notenote.Fragments.AddNotesToDoPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
 import com.teampenguin.apps.notenote.Fragments.MyNotesFragment;
-import com.teampenguin.apps.notenote.Fragments.TodoListFragment;
-import com.teampenguin.apps.notenote.Models.NoteEntryM;
+import com.teampenguin.apps.notenote.Fragments.TaskListFragment;
 import com.teampenguin.apps.notenote.R;
 import com.teampenguin.apps.notenote.Utils.Utils;
-import com.teampenguin.apps.notenote.ViewModels.NoteEntryViewModel;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -131,9 +118,9 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
     private void setViewPagerAdapter() {
         MainViewPagerAdapter adapter = new MainViewPagerAdapter(getSupportFragmentManager());
 
-        TodoListFragment todoListFragment = new TodoListFragment();
+        TaskListFragment taskListFragment = new TaskListFragment();
         myNotesFragment = new MyNotesFragment();
-        adapter.addFragment(todoListFragment);
+        adapter.addFragment(taskListFragment);
         adapter.addFragment(myNotesFragment);
 
         viewPager.setAdapter(adapter);

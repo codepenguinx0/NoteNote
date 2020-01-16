@@ -63,25 +63,17 @@ public class MyNotesFragment extends Fragment implements PopupMenu.OnMenuItemCli
 
         noteEntryViewModel = ViewModelProviders.of(this).get(NoteEntryViewModel.class);
 
-        LiveData<List<NoteEntryM>> allNoteEntries = noteEntryViewModel.getAllNoteEntries();
+        noteEntryViewModel.getAllNoteEntries().observe(this, new Observer<List<NoteEntryM>>() {
+            @Override
+            public void onChanged(List<NoteEntryM> noteEntries) {
 
-        if(allNoteEntries!=null)
-        {
-//            Log.d(TAG, "onCreate: note entries count " + allNoteEntries.getValue().size());
-            noteEntryViewModel.getAllNoteEntries().observe(this, new Observer<List<NoteEntryM>>() {
-                @Override
-                public void onChanged(List<NoteEntryM> noteEntries) {
-
-                    if(adapter!=null)
-                    {
-                        adapter.submitList(noteEntries);
-                    }
+                if(adapter!=null)
+                {
+                    adapter.submitList(noteEntries);
                 }
-            });
-        }else
-        {
-            Log.d(TAG, "onCreate: allNoteEntries is null");
-        }
+            }
+        });
+
 
     }
 
