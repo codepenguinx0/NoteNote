@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.teampenguin.apps.notenote.Adapters.MainViewPagerAdapter;
 import com.teampenguin.apps.notenote.Fragments.AddNotesToDoPopupFragment;
 import com.teampenguin.apps.notenote.Fragments.CommonFragmentInterface;
+import com.teampenguin.apps.notenote.Fragments.CreateNewTaskFragment;
 import com.teampenguin.apps.notenote.Fragments.MyNotesFragment;
 import com.teampenguin.apps.notenote.Fragments.TaskListFragment;
 import com.teampenguin.apps.notenote.R;
@@ -73,6 +74,41 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
         getViews();
         setViewPagerAdapter();
 
+    }
+
+    @OnClick(R.id.bottom_bar_todo_list_ll)
+    public void goToTaskList() {
+        viewPager.setCurrentItem(PAGE_TASKS);
+        onTodoListPageSelected();
+    }
+
+    @OnClick(R.id.bottom_bar_my_notes_ll)
+    public void goToNoteList() {
+        viewPager.setCurrentItem(PAGE_NOTES);
+        onMyNotesPageSelected();
+    }
+
+    @OnClick(R.id.main_add_iv)
+    public void showAddPopup() {
+        searchBarET.setEnabled(false);
+        AddNotesToDoPopupFragment fragment = new AddNotesToDoPopupFragment();
+        fragment.setCommonListener(this);
+        fragment.setCallBackListener(this);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.main_container_popup, fragment, AddNotesToDoPopupFragment.TAG)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(AddNotesToDoPopupFragment.TAG)
+                .commit();
+    }
+
+    @OnClick(R.id.tool_bar_menu_iv)
+    public void openDrawer() {
+        Toast.makeText(this, "Open Drawer!", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.tool_bar_settings_iv)
+    public void openSettings() {
+        Toast.makeText(this, "Open Settings!", Toast.LENGTH_SHORT).show();
     }
 
     private void getViews() {
@@ -150,41 +186,6 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
         onTodoListPageSelected();
     }
 
-    @OnClick(R.id.bottom_bar_todo_list_ll)
-    public void goToTaskList() {
-        viewPager.setCurrentItem(PAGE_TASKS);
-        onTodoListPageSelected();
-    }
-
-    @OnClick(R.id.bottom_bar_my_notes_ll)
-    public void goToNoteList() {
-        viewPager.setCurrentItem(PAGE_NOTES);
-        onMyNotesPageSelected();
-    }
-
-    @OnClick(R.id.main_add_iv)
-    public void showAddPopup() {
-        searchBarET.setEnabled(false);
-        AddNotesToDoPopupFragment fragment = new AddNotesToDoPopupFragment();
-        fragment.setCommonListener(this);
-        fragment.setCallBackListener(this);
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.main_container_popup, fragment, AddNotesToDoPopupFragment.TAG)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(AddNotesToDoPopupFragment.TAG)
-                .commit();
-    }
-
-    @OnClick(R.id.tool_bar_menu_iv)
-    public void openDrawer() {
-        Toast.makeText(this, "Open Drawer!", Toast.LENGTH_SHORT).show();
-    }
-
-    @OnClick(R.id.tool_bar_settings_iv)
-    public void openSettings() {
-        Toast.makeText(this, "Open Settings!", Toast.LENGTH_SHORT).show();
-    }
-
     private void onTodoListPageSelected() {
         goToTodoListLL.setBackgroundColor(getResources().getColor(R.color.main_dark_yellow));
         goToMyNotesLL.setBackgroundColor(getResources().getColor(R.color.main_yellow));
@@ -193,6 +194,16 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
     private void onMyNotesPageSelected() {
         goToMyNotesLL.setBackgroundColor(getResources().getColor(R.color.main_dark_yellow));
         goToTodoListLL.setBackgroundColor(getResources().getColor(R.color.main_yellow));
+    }
+
+    private void openCreateTaskPopup()
+    {
+        CreateNewTaskFragment fragment = new CreateNewTaskFragment();
+        fragment.setCommonListener(this);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_container_popup, fragment, CreateNewTaskFragment.TAG)
+                .addToBackStack(CreateNewTaskFragment.TAG)
+                .commit();
     }
 
     @Override
@@ -216,10 +227,9 @@ public class MainActivity extends BaseActivity implements CommonFragmentInterfac
 
     @Override
     public void createNewTask() {
-
         closeFragmentByTag(AddNotesToDoPopupFragment.TAG);
         searchBarET.setEnabled(true);
-        Toast.makeText(this, "Create new task!", Toast.LENGTH_SHORT).show();
+        openCreateTaskPopup();
     }
 
 

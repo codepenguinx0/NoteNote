@@ -24,13 +24,13 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class TaskListFragment extends Fragment {
 
 
     @BindView(R.id.todo_list_rv)
     RecyclerView todoListRV;
-
 
     private TaskEntryViewModel viewModel = null;
 

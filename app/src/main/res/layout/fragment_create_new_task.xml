@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignParentBottom="true"
+    android:background="@drawable/shared_shade_bg"
+    android:clickable="true"
+    android:fitsSystemWindows="true">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/create_task_cv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_centerInParent="true"
+        android:layout_marginEnd="36dp"
+        app:cardCornerRadius="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Create A New task"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:hint="Enter a title"
+                android:inputType="text"
+                android:maxLength="100"
+                android:maxLines="1" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:paddingStart="6dp"
+                    android:text="Remind me on a day"
+                    android:textSize="16sp" />
+
+                <Switch
+                    android:id="@+id/create_task_reminder_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/create_task_alarm_rl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:paddingStart="6dp"
+                    android:text="Alarm"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/create_task_picked_date_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="Pick a date"
+                    android:textColor="@color/main_orange"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingStart="6dp"
+                android:text="Notes"
+                android:textSize="16sp" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/transparent"
+                        android:hint="notes here"
+                        android:maxLines="20"
+                        android:paddingStart="6dp" />
+                </LinearLayout>
+            </ScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/create_task_cancel_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="1"
+                    android:text="Cancel" />
+
+                <Button
+                    android:id="@+id/create_task_save_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="1"
+                    android:text="Save" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!--<ImageView-->
+    <!--android:id="@+id/create_task_close_iv"-->
+    <!--android:layout_width="50dp"-->
+    <!--android:layout_height="50dp"-->
+    <!--android:layout_below="@+id/create_task_cv"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_marginTop="10dp"-->
+    <!--android:layout_marginBottom="20dp"-->
+    <!--android:src="@drawable/ic_cancel" />-->
+
+</RelativeLayout>
